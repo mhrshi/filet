@@ -48,6 +48,7 @@
 						no-data-text="Please select a subject :)"
 						:items="practicals"
 						hide-actions
+						must-sort
 						class="elevation-1 practical-table">
 						<template slot="items"
 									slot-scope="props">
@@ -59,6 +60,20 @@
 							</td>
 						</template>
 					</v-data-table>
+					<v-snackbar
+						v-model="snackbar"
+						bottom
+						left
+						:color="snackbarColor"
+						:timeout="6000">
+						{{ snackbarMessage }}
+						<v-btn
+							dark
+							flat
+							@click="snackbar = false">
+							close
+						</v-btn>
+					</v-snackbar>
 				</v-flex>
 			</v-layout>
 		</v-container>
@@ -72,6 +87,9 @@
 		data () {
 			return {
 				dialog: false,
+				snackbar: false,
+				snackbarColor: '',
+				snackbarMessage: '',
 				editedIndex: -1,
 				editedItem: {
 					id: '',
@@ -121,10 +139,15 @@
 
 		methods: {
 			subjectChange(subject) {
+				if (this.select.endsWith('04')) {
+					console.log(`04 returned`);
+					return;
+				}
 				if (this[this.select].length > 0) {
 					this.practicals = this[this.select];
 					return;
 				}
+				console.log(`server call for ${this.select}`);
 				fetch('/api/secure/practicals', {
 					method: 'POST',
 					headers: {
@@ -135,12 +158,7 @@
 						subject: this.select.toLowerCase(),
 						username: this.$store.state.username
 					})
-				}).then(res => {
-					if (res.code === 204) {
-						throw Error(res.statusText);
-					}
-					return res.json();
-				})
+				}).then(res => res.json())
 				  .then(practicals => {
 						this.practicals = practicals;
 						this[this.select] = practicals;
@@ -159,9 +177,34 @@
 			},
 			save() {
 				const link = this.editedItem.fileid;
-				this.editedItem.fileid = link.slice(link.indexOf('=') + 1);
+				if (link !== null && link.length > 0) {
+					this.editedItem.fileid = link.slice(link.indexOf('=') + 1);
+				}
 				Object.assign(this.practicals[this.editedIndex], this.editedItem);
 				this[this.select] = this.practicals;
+				fetch('/api/secure/revise', {
+					method: 'POST',
+					headers: {
+						'Accept': 'application/json',
+						'Content-Type': 'application/json'
+					},
+					body: JSON.stringify({
+						subject: this.select.toLowerCase(),
+						username: this.$store.state.username,
+						fileid: this.editedItem.fileid,
+						pracid: this.editedItem.id
+					})
+				}).then(res => res.json())
+				  .then(res => {
+					  if (res.code === 200) {
+						    this.snackbarColor = "success";
+							this.snackbarMessage = "File ID saved successfully";
+					  } else {
+						    this.snackbarColor = "error";
+						    this.snackbarMessage = "Error saving File ID";
+					  }
+					  this.snackbar = true;
+				  });
 				this.close();
 			}
 		},

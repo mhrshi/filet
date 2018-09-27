@@ -8,6 +8,7 @@ const request = require('request');
 const async = require('async');
 const archiver = require('archiver');
 const cookieParser = require('cookie-parser');
+const compression = require('compression');
 
 const entranceRouter = require('./routes/entrance');
 const secureRouter = require('./routes/secure');
@@ -17,6 +18,7 @@ const app = express();
 
 app.use(cors())
    .use(helmet())
+   .use(compression())
    .use(cookieParser(process.env.LOL))
    .use(bodyParser.json())
    .use(bodyParser.urlencoded({ extended: false }))

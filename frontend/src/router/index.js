@@ -48,6 +48,10 @@ export default new Router({
 						if (res.code === 401) {
 							next('/login');
 						} else {
+							store.commit('update', {
+								prefix: res.prefix,
+								username: res.username
+							});
 							next();
 						}
 					}).catch(error => {
