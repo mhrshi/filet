@@ -9,8 +9,7 @@
 	"scripts": {
 		"start": "node server.js",
 		"test": "echo \"Error: no test specified\" && exit 1",
-		"backend": "nodemon --exec heroku local",
-		"heroku-postbuild": "cd frontend && npm install && npm run build"
+		"backend": "nodemon --exec heroku local"
 	},
 	"dependencies": {
 		"archiver": "^3.0.0",
