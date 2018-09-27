@@ -15,7 +15,6 @@ entrance.post('/', async (req, res) => {
             maxAge: 1800000,
         });
     }
-    console.log(`reply: ${reply}`);
 	res.json(reply);
 });
 
