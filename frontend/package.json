@@ -11,6 +11,7 @@
   },
   "dependencies": {
 	"material-design-icons-iconfont": "^3.0.3",
+	"ora": "^2.0.0",
 	"shelljs": "^0.8.2",
     "vue": "^2.5.17",
     "vue-router": "^3.0.1",
@@ -37,7 +38,6 @@
     "mini-css-extract-plugin": "^0.4.0",
     "node-notifier": "^5.1.2",
     "optimize-css-assets-webpack-plugin": "^4.0.0",
-    "ora": "^2.0.0",
     "portfinder": "^1.0.13",
     "postcss-import": "^11.0.0",
     "postcss-loader": "^2.0.8",
