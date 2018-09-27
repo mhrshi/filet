@@ -1,5 +1,5 @@
 {
-	"name": "griffyle",
+	"name": "filet",
 	"version": "1.0.0",
 	"description": "A web app to handle files",
 	"engines": {
@@ -28,7 +28,7 @@
 	},
 	"repository": {
 		"type": "git",
-		"url": "https://git.heroku.com/griffyle.git"
+		"url": "https://git.heroku.com/filet.git"
 	},
 	"keywords": [
 		"nodejs",
