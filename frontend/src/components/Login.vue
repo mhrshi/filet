@@ -88,12 +88,12 @@ export default {
 			  .then(res => {
 				  if (res.matched) {
 					  const type = this.selected === 'IU' ? 'student' : 'faculty';
-					  this.$router.push({
-						  path: `/${type}/${this.selected}${this.username}`
-					  });
 					  this.$store.commit('update', {
 						  prefix: this.selected,
 						  username: `${this.selected}${this.username}`
+					  });
+					  this.$router.push({
+						  path: `/${type}/${this.selected}${this.username}`
 					  });
 				  } else {
 					  this[res.errorIn] = res.error;

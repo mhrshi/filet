@@ -25,7 +25,7 @@ app.use(cors())
 app.use(express.static(path.join(__dirname, 'frontend/dist')))
    .listen(PORT, () => console.log(`Listening on ${ PORT }`));
 
-app.get('/*', (req, res) => {
+app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'frontend/dist'), (error) => {
         if (error) {
             res.status(500).send(error);
