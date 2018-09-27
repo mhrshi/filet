@@ -23,11 +23,11 @@ app.use(cors())
    .use('/secure', secureRouter)
    .use('/entrance', entranceRouter);
 
-app.use(express.static(path.join(__dirname, 'frontend/dist/index.html')))
+app.use(express.static(path.join(__dirname, 'frontend/dist')))
    .listen(PORT, () => console.log(`Listening on ${ PORT }`));
 
 app.get('/*', (req, res) => {
-    res.sendFile(path.join(__dirname, 'frontend/dist/index.html'), (error) => {
+    res.sendFile(path.join(__dirname, 'frontend/dist'), (error) => {
         if (error) {
             res.status(500).send(error);
         }
