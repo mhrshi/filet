@@ -92,10 +92,7 @@ export default {
 						  prefix: this.selected,
 						  username: `${this.selected}${this.username}`
 					  });
-					  this.$router.push({
-						  path: `/${type}/${this.selected}${this.username}`
-					  });
-					  console.log(`pushed path: /${type}/${this.selected}${this.username}`);
+					  this.$router.push(`/${type}/${this.selected}${this.username}`);
 				  } else {
 					  this[res.errorIn] = res.error;
 				  }
