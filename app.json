@@ -1,0 +1,8 @@
+{
+  "name": "griffyle",
+  "description": "A web app to handle files",
+  "repository": "https://git.heroku.com/griffyle.git",
+  "logo": "",
+  "keywords": ["node", "express", "griffyle"],
+  "image": "heroku/nodejs"
+}
