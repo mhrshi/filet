@@ -95,6 +95,7 @@ export default {
 					  this.$router.push({
 						  path: `/${type}/${this.selected}${this.username}`
 					  });
+					  console.log(`pushed path: /${type}/${this.selected}${this.username}`);
 				  } else {
 					  this[res.errorIn] = res.error;
 				  }
