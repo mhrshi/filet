@@ -18,7 +18,7 @@ const prod = {
     ssl: true
 };
 
-const database = pgp(dev);
+const database = pgp(prod);
 
 module.exports = {
     express,

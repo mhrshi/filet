@@ -1,4 +1,7 @@
 const { database, express, jwt } = require('../globals');
+const request = require('request');
+const async = require('async');
+const archiver = require('archiver');
 
 const secure = express.Router();
 
@@ -52,6 +55,45 @@ secure.post('/revise', (req, res) => {
                 console.log(error);
                 res.send(error);
             });
+});
+
+secure.post('/practicals/completed', async (req, res) => {
+    try {
+        const completed = await database.any(`SELECT * FROM ${req.body.subject} WHERE fileid <> '' ORDER BY e_no ASC, id ASC`);
+        res.json(completed);
+    } catch(error) {
+        console.log(error);
+        res.status(204).send(error);
+    }
+});
+
+secure.post('/downloadFiles', (req, res) => {
+    const zipArchive = archiver('zip');
+    res.attachment('filet.zip');
+    async.eachLimit(req.body.rows, 3, (row, done) => {
+        let filename = "";
+        let stream = request(`https://drive.google.com/uc?export=download&id=${row.fileid}`)
+                            .on('response', res => {
+                                let contentDisp = res.headers['content-disposition'];
+                                if (contentDisp === undefined) {
+                                    console.log(`couldn't fetch ${row.fileid}`);
+                                    return;
+                                }
+                                filename = contentDisp.split('filename=')[1]
+                                                      .split(';')[0]
+                                                      .replace(/"/g, '');
+                                zipArchive.append(stream, { name : `${row.e_no}/${filename}` });
+                            })
+                            .on('error', err => done(err))
+                            .on('end', () => done());
+    }, err => {
+        if (err) {
+            throw err;
+        } else {
+            zipArchive.pipe(res);
+            zipArchive.finalize();
+        }
+    });
 });
 
 module.exports = secure;

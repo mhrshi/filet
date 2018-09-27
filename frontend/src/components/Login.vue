@@ -73,7 +73,7 @@ export default {
 			if (!this.$refs.form.validate()) {
 				return;
 			}
-			fetch('/api/entrance', {
+			fetch('/entrance', {
 				method: 'POST',
 				headers: {
 					'Accept': 'application/json',

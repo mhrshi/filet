@@ -6,7 +6,7 @@ const entrance = express.Router();
 entrance.post('/', async (req, res) => {
     const username = `${req.body.prefix}${req.body.username}`;
     const password = req.body.password;
-    const reply = await userAuth(username, password);
+    const reply = await userAuth(req.body.prefix, username, password);
     if (reply.matched) {
         await res.cookie('FiletLog', jwt.sign({
             prefix: req.body.prefix,
@@ -18,10 +18,11 @@ entrance.post('/', async (req, res) => {
 	res.json(reply);
 });
 
-async function userAuth(username, password) {
-	const reply = { matched: false, error: '', errorIn: '' };
+async function userAuth(prefix, username, password) {
+    const reply = { matched: false, error: '', errorIn: '' };
+    const type = prefix === 'IU' ? 'student' : 'faculty';
 	try {
-		const user = await database.one(`SELECT * from student WHERE id='${username}'`);
+		const user = await database.one(`SELECT * from ${type} WHERE id='${username}'`);
 		const result = await bcrypt.compare(password, user.pwd);
 		if (result) {
             reply.matched = result;

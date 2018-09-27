@@ -2,6 +2,7 @@ import Vue from 'vue';
 import Router from 'vue-router';
 import Login from '@/components/Login';
 import StudentDash from '@/components/StudentDash';
+import FacultyDash from '@/components/FacultyDash';
 import FourHundredFour from '@/components/FourHundredFour';
 import { store } from '../store';
 
@@ -14,7 +15,7 @@ export default new Router({
 			path: '/',
 			name: 'Root',
 			beforeEnter: (to, from, next) => {
-				fetch('/api/secure/check')
+				fetch('/secure/check')
 					.then(res => res.json())
 					.then(res => {
 						if (res.code === 200) {
@@ -42,7 +43,29 @@ export default new Router({
 			name: 'StudentDash',
 			component: StudentDash,
 			beforeEnter: (to, from, next) => {
-				fetch('/api/secure/check')
+				fetch('/secure/check')
+					.then(res => res.json())
+					.then(res => {
+						if (res.code === 401) {
+							next('/login');
+						} else {
+							store.commit('update', {
+								prefix: res.prefix,
+								username: res.username
+							});
+							next();
+						}
+					}).catch(error => {
+						next('/FourHundredFour');
+					});
+			}
+		},
+		{
+			path: '/faculty/:id',
+			name: 'FacultyDash',
+			component: FacultyDash,
+			beforeEnter: (to, from, next) => {
+				fetch('/secure/check')
 					.then(res => res.json())
 					.then(res => {
 						if (res.code === 401) {

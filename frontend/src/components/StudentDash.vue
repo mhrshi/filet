@@ -1,11 +1,21 @@
 <template>
 	<v-app>
     <v-toolbar prominent>
-      <v-toolbar-title class="headline">Filet</v-toolbar-title>
-      <v-spacer></v-spacer>
-      <v-btn icon>
-        <v-icon>more_vert</v-icon>
-      </v-btn>
+		<v-toolbar-title class="headline">Filet</v-toolbar-title>
+		<v-spacer></v-spacer>
+		<v-menu offset-y>
+			<v-btn slot="activator" icon>
+				<v-icon>more_vert</v-icon>
+			</v-btn>
+			<v-list>
+				<v-list-tile
+					v-for="(item, index) in overflowItems"
+					:key="index"
+					@click="onLogout">
+					<v-list-tile-title>{{ item.title }}</v-list-tile-title>
+				</v-list-tile>
+			</v-list>
+		</v-menu>
     </v-toolbar>
 	<main>
 		<v-container fill-height>
@@ -49,7 +59,7 @@
 						:items="practicals"
 						hide-actions
 						must-sort
-						class="elevation-1 practical-table">
+						class="elevation-1">
 						<template slot="items"
 									slot-scope="props">
 							<td class="text-xs-right">{{ props.item.id }}</td>
@@ -133,22 +143,23 @@
 				IT0501: [],
 				IT0502: [],
 				IT0504: [],
-				IT0604: []
+				IT0604: [],
+				overflowItems: [
+					{ title: 'Logout' }
+				]
 			}
 		},
 
 		methods: {
 			subjectChange(subject) {
 				if (this.select.endsWith('04')) {
-					console.log(`04 returned`);
 					return;
 				}
 				if (this[this.select].length > 0) {
 					this.practicals = this[this.select];
 					return;
 				}
-				console.log(`server call for ${this.select}`);
-				fetch('/api/secure/practicals', {
+				fetch('/secure/practicals', {
 					method: 'POST',
 					headers: {
 						'Accept': 'application/json',
@@ -163,7 +174,7 @@
 						this.practicals = practicals;
 						this[this.select] = practicals;
 					})
-				  .catch(error => console.log(error));
+				  .catch(error => {});
 			},
 			editItem(item) {
 				this.editedIndex = this.practicals.indexOf(item);
@@ -182,7 +193,7 @@
 				}
 				Object.assign(this.practicals[this.editedIndex], this.editedItem);
 				this[this.select] = this.practicals;
-				fetch('/api/secure/revise', {
+				fetch('/secure/revise', {
 					method: 'POST',
 					headers: {
 						'Accept': 'application/json',
@@ -206,6 +217,14 @@
 					  this.snackbar = true;
 				  });
 				this.close();
+			},
+			onLogout() {
+				document.cookie = 'FiletLog=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;'
+				this.$store.commit('update', {
+					prefix: '',
+					username: ''
+				});
+				this.$router.push('/login');
 			}
 		},
 
@@ -216,7 +235,7 @@
 		},
 
 		mounted: async function() {
-			fetch('/api/secure/subjects')
+			fetch('/secure/subjects')
 				.then(res => res.json())
 				.then(subjects => {
 					this.subjects = subjects;
