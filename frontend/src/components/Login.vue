@@ -92,7 +92,7 @@ export default {
 						  prefix: this.selected,
 						  username: `${this.selected}${this.username}`
 					  });
-					  this.$router.push(`/${type}/${this.selected}${this.username}`);
+					  this.$router.go(`/${type}/${this.selected}${this.username}`);
 				  } else {
 					  this[res.errorIn] = res.error;
 				  }

@@ -49,11 +49,11 @@ export default new Router({
 						if (res.code === 401) {
 							next('/login');
 						} else {
+							next();
 							store.commit('update', {
 								prefix: res.prefix,
 								username: res.username
 							});
-							next();
 						}
 					}).catch(error => {
 						next('/FourHundredFour');
