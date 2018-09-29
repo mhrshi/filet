@@ -5,6 +5,8 @@ const archiver = require('archiver');
 
 const secure = express.Router();
 
+console.log(`from secure: ${process.env.LOL}`);
+
 secure.use((req, res, next) => {
     jwt.verify(req.cookies.FiletLog, 'vniiCm_54GR84lsb7rYHkB9fAeM', (error, data) => {
         if (req.path.includes("check")) {
