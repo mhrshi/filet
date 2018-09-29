@@ -26,6 +26,7 @@
 						v-model="selected"
 						no-data-text="Nothing to display :("
 						:items="practicals"
+						:item-key="id + e_no"
 						hide-actions
 						must-sort
 						select-all
