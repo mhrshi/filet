@@ -48,8 +48,10 @@ export default new Router({
 					.then(res => res.json())
 					.then(res => {
 						if (res.code === 401) {
+							console.log('going to login');
 							next('/login');
 						} else {
+							console.log('going to next');
 							next();
 							store.commit('update', {
 								prefix: res.prefix,
