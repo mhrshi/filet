@@ -112,7 +112,6 @@
 				  .then(blob => {
 					const link = window.URL.createObjectURL(blob);
 					const a = document.createElement('a');
-					link.download = 'filet.zip';
 					a.href = link;
 					a.click();
         		});
