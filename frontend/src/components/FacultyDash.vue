@@ -96,10 +96,9 @@
 		methods: {
 			downloadFiles() {
 				if (this.selected.length <= 0) {
-					console.log("returning");
 					return;
 				}
-				fetch('/api/secure/downloadFiles', {
+				fetch('/secure/downloadFiles', {
 					method: 'POST',
 					headers: {
 						'Accept': 'application/json',
@@ -128,14 +127,8 @@
 			}
 		},
 
-		watch: {
-			selected(val) {
-				console.log(this.selected);
-			}
-		},
-
 		mounted: async function() {
-			fetch('/api/secure/practicals/completed', {
+			fetch('/secure/practicals/completed', {
 				method: 'POST',
 				headers: {
 					'Accept': 'application/json',
