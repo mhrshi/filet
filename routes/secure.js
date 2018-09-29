@@ -6,9 +6,9 @@ const archiver = require('archiver');
 const secure = express.Router();
 
 secure.use((req, res, next) => {
-    res.setHeader('Last-Modified', (new Date()).toUTCString());
     jwt.verify(req.cookies.FiletLog, process.env.LOL, (error, data) => {
         if (req.path.includes("check")) {
+            res.setHeader('Last-Modified', (new Date()).toUTCString());
             if (error) {
                 res.json({ code: 401 });
             } else {
