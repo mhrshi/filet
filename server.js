@@ -13,20 +13,6 @@ const secureRouter = require('./routes/secure');
 const PORT = process.env.PORT || 5000;
 const app = express();
 
-const dateConfig = {
-    // year: 'numeric',
-    // month: 'numeric',
-    // day: '2-digit',
-    // hour: '2-digit',
-    // minute: '2-digit',
-    // hour12: false,
-    timeZone: 'Asia/Kolkata'
-}
-
-console.log((new Date()).toLocaleString(dateConfig));
-
-
-
 app.use(cors())
    .use(helmet())
    .use(compression())

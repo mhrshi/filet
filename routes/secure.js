@@ -73,7 +73,7 @@ secure.post('/practicals/completed', async (req, res) => {
 
 secure.post('/downloadFiles', (req, res) => {
     const zipArchive = archiver('zip');
-    res.attachment('filet.zip');
+    res.attachment(nameWithStamp());
     async.eachLimit(req.body.rows, 3, (row, done) => {
         let filename = "";
         let stream = request(`https://drive.google.com/uc?export=download&id=${row.fileid}`)
@@ -99,5 +99,21 @@ secure.post('/downloadFiles', (req, res) => {
         }
     });
 });
+
+function nameWithStamp() {
+    const dateObject = (new Date()).toLocaleString();
+    const [date, time] = dateObject.split(', ');
+    const [month, day, year] = date.split('/');
+    let [hours, mins] = time.split(':');
+    if (time.endsWith('PM') && hours < 12) {
+        hours = hours - 0 + 12;
+    }
+    if (time.endsWith('AM') && hours === '12') {
+        hours = '00';
+    }
+    return `filet-${year}-${('0' + month).slice(-2)}-${('0' + day).slice(-2)}-${hours}${mins}.zip`;
+}
+
+console.log(nameWithStamp());
 
 module.exports = secure;
