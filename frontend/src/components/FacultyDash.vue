@@ -109,10 +109,10 @@
 					})
 				}).then(response => response.blob())
 				  .then(blob => {
-					var url = window.URL.createObjectURL(blob);
-					var a = document.createElement('a');
-					url.download = 'filet.zip';
-					a.href = url;
+					const link = window.URL.createObjectURL(blob);
+					const a = document.createElement('a');
+					link.download = 'filet.zip';
+					a.href = link;
 					a.click();
         		});
 
