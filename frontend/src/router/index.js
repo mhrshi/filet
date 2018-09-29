@@ -43,6 +43,7 @@ export default new Router({
 			name: 'StudentDash',
 			component: StudentDash,
 			beforeEnter: (to, from, next) => {
+				console.log('before entering StudentDash');
 				fetch('/secure/check')
 					.then(res => res.json())
 					.then(res => {
