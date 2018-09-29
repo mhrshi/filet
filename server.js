@@ -6,6 +6,7 @@ const path = require('path');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 const compression = require('compression');
+const fallback = require('express-history-api-fallback');
 
 const entranceRouter = require('./routes/entrance');
 const secureRouter = require('./routes/secure');
@@ -23,15 +24,16 @@ app.use(cors())
    .use('/entrance', entranceRouter);
 
 app.use(express.static(path.join(__dirname, 'frontend/dist')))
+   .use(fallback('frontend/dist/index.html', { root: __dirname }))
    .listen(PORT, () => console.log(`Listening on ${ PORT }`));
 
-app.get('/*', (req, res) => {
-    res.sendFile(path.join(__dirname, 'frontend/dist/index.html'), (error) => {
-        if (error) {
-            res.status(500).send(error);
-        }
-    });
-});
+// app.get('/*', (req, res) => {
+//     res.sendFile(path.join(__dirname, 'frontend/dist/index.html'), (error) => {
+//         if (error) {
+//             res.status(500).send(error);
+//         }
+//     });
+// });
 
 // app.post('/inFile', (req, res) => {
 //     console.log(req.body);
