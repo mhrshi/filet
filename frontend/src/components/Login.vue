@@ -3,7 +3,7 @@
 		<main>
 			<v-container fill-height>
 				<v-layout align-center justify-center>
-					<v-flex xs12 sm8 md4>
+					<v-flex xs12 sm7 md7 lg5 xl4>
 						<v-card class="login-card">
 							<h3 class="headline mb-0">Log In</h3>
 							<br/><br/>

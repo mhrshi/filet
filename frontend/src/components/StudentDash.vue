@@ -66,7 +66,7 @@
 							<td class="text-xs-center">{{ props.item.name }}</td>
 							<td class="text-xs-center">{{ props.item.fileid }}</td>
 							<td class="justify-center align-center layout px-0">
-								<v-icon @click="editItem(props.item)" class="mr-2">edit</v-icon>
+								<v-icon @click="editItem(props.item)">edit</v-icon>
 							</td>
 						</template>
 					</v-data-table>
@@ -153,6 +153,7 @@
 		methods: {
 			subjectChange(subject) {
 				if (this.select.endsWith('04')) {
+					this.practicals = [];
 					return;
 				}
 				if (this[this.select].length > 0) {
@@ -248,5 +249,9 @@
 <style scoped>
 	.subject-select {
 		margin: 0 auto;
+	}
+
+	.edit-icon {
+		cursor: pointer;
 	}
 </style>
