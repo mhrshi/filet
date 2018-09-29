@@ -10,8 +10,6 @@ const compression = require('compression');
 const entranceRouter = require('./routes/entrance');
 const secureRouter = require('./routes/secure');
 
-console.log(`from server: ${process.env.LOL}`);
-
 const PORT = process.env.PORT || 5000;
 const app = express();
 

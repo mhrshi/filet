@@ -10,11 +10,11 @@ const dev = {
     password: process.env.LOCAL_DB_PWD
 };
 const prod = {
-    host: 'ec2-54-217-235-159.eu-west-1.compute.amazonaws.com',
-    port: 5432,
-    database: 'd969iig46vueu2',
-    user: 'fgbwqhvucckgiy',
-    password: 'bd73433389b2c2f05c16672b053a389680c299742a599e22606a598a7be05c71',
+    host: process.env.DB_HOST,
+    port: process.env.DB_PORT,
+    database: process.env.DB_NAME,
+    user: process.env.DB_USER,
+    password: process.env.DB_PWD,
     ssl: true
 };
 

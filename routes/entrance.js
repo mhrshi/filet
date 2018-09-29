@@ -11,7 +11,7 @@ entrance.post('/', async (req, res) => {
         await res.cookie('FiletLog', jwt.sign({
             prefix: req.body.prefix,
             username: username
-        }, 'vniiCm_54GR84lsb7rYHkB9fAeM', { expiresIn: "1800000" }), {
+        }, process.env.LOL, { expiresIn: "1800000" }), {
             maxAge: 1800000,
         });
     }
