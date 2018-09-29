@@ -25,8 +25,8 @@
 						:headers="headers"
 						v-model="selected"
 						no-data-text="Nothing to display :("
-						:items="practicals"
-						item-key="id + e_no"
+						:items="indexedPracs"
+						item-key="uuid"
 						hide-actions
 						must-sort
 						select-all
@@ -127,6 +127,15 @@
 				this.$router.push('/login');
 			}
 		},
+
+		computed: {
+    		indexedPracs () {
+      			return this.practicals.map((item, index) => ({
+        			uuid: index,
+        			...item
+      			}))
+    		}
+  		},
 
 		mounted: async function() {
 			fetch('/secure/practicals/completed', {
