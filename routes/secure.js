@@ -10,8 +10,11 @@ secure.use((req, res, next) => {
         if (req.path.includes("check")) {
             res.setHeader('Last-Modified', (new Date()).toUTCString());
             if (error) {
+                console.log(`sending 401`);
+                console.log(error);
                 res.json({ code: 401 });
             } else {
+                console.log(`logging in yo`);
                 res.json({ code: 200, prefix: data.prefix, username: data.username });
             }
         } else {
