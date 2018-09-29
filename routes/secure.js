@@ -9,8 +9,10 @@ secure.use((req, res, next) => {
     jwt.verify(req.cookies.FiletLog, process.env.LOL, (error, data) => {
         if (req.path.includes("check")) {
             if (error) {
+                console.log(error);
                 res.json({ code: 401 });
             } else {
+                console.log(`jwt verified`);
                 res.json({ code: 200, prefix: data.prefix, username: data.username });
             }
         } else {
