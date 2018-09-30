@@ -1,3 +1,4 @@
+const bcrypt = require('bcrypt');
 const express = require('express');
 const pgp = require('pg-promise')();
 const jwt = require('jsonwebtoken');
@@ -21,6 +22,7 @@ const prod = {
 const database = pgp(prod);
 
 module.exports = {
+    bcrypt,
     express,
     database,
     jwt

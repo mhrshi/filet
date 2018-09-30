@@ -6,9 +6,11 @@ const path = require('path');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 const compression = require('compression');
+const nodemailer = require('nodemailer');
 
 const entranceRouter = require('./routes/entrance');
 const secureRouter = require('./routes/secure');
+const renewRouter = require('./routes/renew');
 
 const PORT = process.env.PORT || 5000;
 const app = express();
@@ -20,7 +22,8 @@ app.use(cors())
    .use(bodyParser.json())
    .use(bodyParser.urlencoded({ extended: false }))
    .use('/secure', secureRouter)
-   .use('/entrance', entranceRouter);
+   .use('/entrance', entranceRouter)
+   .use('/renew', renewRouter);
 
 app.use(express.static(path.join(__dirname, 'frontend/dist')))
    .listen(PORT, () => console.log(`Listening on ${ PORT }`));
@@ -32,6 +35,32 @@ app.get('/*', (req, res) => {
         }
     });
 });
+
+const mailConfig = {
+    from: 'Filet App <maharshibhavsar.16.it@iite.indusuni.ac.in>',
+    to: 'bhavsarm99@gmail.com',
+    subject: 'First Filet Test Email',
+    generateTextFromHTML: true,
+    html: 'Test mail sent from Filet server'
+};
+
+function sendMail() {
+    const transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+            type: 'OAuth2',
+            user: 'maharshibhavsar.16.it@iite.indusuni.ac.in',
+            clientId: process.env.GCP_CID,
+            clientSecret: process.env.GCP_SEC,
+            refreshToken: process.env.REF_TOK,
+            accessToken: 'generateYourself'
+        }
+    });
+    transporter.sendMail(mailConfig, (error, res) => {
+        error ? console.log(error) : console.log(res);
+        transporter.close();
+    })
+}
 
 // app.post('/inFile', (req, res) => {
 //     console.log(req.body);

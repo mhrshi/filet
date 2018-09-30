@@ -21,8 +21,10 @@
 		"cors": "^2.8.4",
 		"dotenv": "^6.0.0",
 		"express": "^4.15.2",
+		"googleapis": "^34.0.0",
 		"helmet": "^3.13.0",
 		"jsonwebtoken": "^8.3.0",
+		"nodemailer": "^4.6.8",
 		"pg-promise": "^8.4.6",
 		"request": "^2.88.0"
 	},

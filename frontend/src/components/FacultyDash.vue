@@ -46,6 +46,8 @@
 						<template slot="footer">
 							<td colspan="100%">
 								<v-btn
+									:disabled="throttled"
+									class="clickable"
 									flat
 									@click="downloadFiles"
 									color="primary">
@@ -58,6 +60,11 @@
 			</v-layout>
 		</v-container>
 	</main>
+	<iframe download class="dummy" name="dummyframe">
+		<form download target="dummyframe" ref="dummyform" method="POST" action="/secure/downloadFiles">
+			<input download ref="dummyinput" type="text" name="incoming" value="" />
+		</form>
+	</iframe>
 	</v-app>
 </template>
 
@@ -87,10 +94,12 @@
 						value: 'name'
 					}
 				],
+				throttled: false,
 				practicals: [],
 				overflowItems: [
 					{ title: 'Logout' }
-				]
+				],
+				incoming: ''
 			}
 		},
 
@@ -99,24 +108,14 @@
 				if (this.selected.length <= 0) {
 					return;
 				}
-				fetch('/secure/downloadFiles', {
-					method: 'POST',
-					headers: {
-						'Accept': 'application/json',
-						'Content-Type': 'application/json'
-					},
-					body: JSON.stringify({
-						rows: this.selected
-					})
-				}).then(response => response.blob())
-				  .then(blob => {
-					const link = window.URL.createObjectURL(blob);
-					const a = document.createElement('a');
-					a.href = link;
-					a.click();
-        		});
-
+				this.throttled = true;
+				setTimeout(() => {
+					this.throttled = false;
+				}, 20000);
+				this.$refs.dummyinput.value = JSON.stringify(this.selected);
+				this.$refs.dummyform.submit();
 			},
+
 			onLogout() {
 				document.cookie = 'FiletLog=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;'
 				this.$store.commit('update', {
@@ -137,7 +136,10 @@
   		},
 
 		mounted: async function() {
-			fetch('/secure/practicals/completed', {
+			if (this.$route.params.id !== this.$store.state.username) {
+				this.$router.replace(`/student/${this.$store.state.username}`);
+			}
+			fetch('/secure/practicals/submitted', {
 				method: 'POST',
 				headers: {
 					'Accept': 'application/json',
@@ -148,8 +150,18 @@
 				})
 			}).then(res => res.json())
 			  .then(practicals => {
-				  this.practicals = practicals;
+				    this.practicals = practicals;
 			  })
 		}
 	}
 </script>
+
+<style scoped>
+	.dummy {
+		display: none;
+	}
+
+	.clickable {
+		cursor: pointer;
+	}
+</style>

@@ -3,40 +3,42 @@ import Router from 'vue-router';
 import Login from '@/components/Login';
 import StudentDash from '@/components/StudentDash';
 import FacultyDash from '@/components/FacultyDash';
+import Reset from '@/components/Reset';
 import FourHundredFour from '@/components/FourHundredFour';
 import { store } from '../store';
 
 Vue.use(Router);
 
-export default new Router({
+const router = new Router({
 	mode: 'history',
 	routes: [
 		{
 			path: '/',
 			name: 'Root',
+			redirect: '/login'
+		},
+		{
+			path: '/login',
+			name: 'Login',
+			component: Login,
 			beforeEnter: (to, from, next) => {
 				fetch('/secure/check')
 					.then(res => res.json())
 					.then(res => {
-						if (res.code === 200) {
+						if (res.code === 401) {
+							next();
+						} else {
 							const type = res.prefix === 'IU' ? 'student' : 'faculty';
 							next(`/${type}/${res.username}`);
 							store.commit('update', {
 								prefix: res.prefix,
 								username: res.username
 							});
-						} else {
-							next('/login');
 						}
 					}).catch(error => {
-						next('/FourHundredFour');
+						next();
 					});
 			}
-		},
-		{
-			path: '/login',
-			name: 'Login',
-			component: Login
 		},
 		{
 			path: '/student/:id',
@@ -49,11 +51,11 @@ export default new Router({
 						if (res.code === 401) {
 							next('/login');
 						} else {
-							next();
 							store.commit('update', {
 								prefix: res.prefix,
 								username: res.username
 							});
+							next();
 						}
 					}).catch(error => {
 						next('/FourHundredFour');
@@ -83,6 +85,30 @@ export default new Router({
 			}
 		},
 		{
+			path: '/reset/:resetid',
+			name: 'Reset',
+			component: Reset,
+			beforeEnter: (to, from, next) => {
+				fetch('/renew/check', {
+					method: 'POST',
+					headers: {
+						'Accept': 'application/json',
+						'Content-Type': 'application/json'
+					},
+					body: JSON.stringify({
+						resetid: to.params.resetid
+					})
+				}).then(res => res.json())
+				  .then(res => {
+				      if (res.code === 200) {
+						  next();
+					  } else {
+						  next('/FourHundredFour');
+					  }
+				  }).catch(error => next('/FourHundredFour'));
+			}
+		},
+		{
 			path: '/FourHundredFour',
 			name: 'FourHundredFour',
 			component: FourHundredFour
@@ -93,3 +119,5 @@ export default new Router({
 		}
 	]
 });
+
+export default router;

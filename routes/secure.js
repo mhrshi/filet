@@ -8,13 +8,9 @@ const secure = express.Router();
 secure.use((req, res, next) => {
     jwt.verify(req.cookies.FiletLog, process.env.LOL, (error, data) => {
         if (req.path.includes("check")) {
-            res.setHeader('Last-Modified', (new Date()).toUTCString());
             if (error) {
-                console.log(`sending 401`);
-                console.log(error);
                 res.json({ code: 401 });
             } else {
-                console.log(`logging in yo`);
                 res.json({ code: 200, prefix: data.prefix, username: data.username });
             }
         } else {
@@ -61,7 +57,7 @@ secure.post('/revise', (req, res) => {
             });
 });
 
-secure.post('/practicals/completed', async (req, res) => {
+secure.post('/practicals/submitted', async (req, res) => {
     try {
         const completed = await database.any(`SELECT * FROM ${req.body.subject} WHERE fileid <> '' ORDER BY e_no ASC, id ASC`);
         res.json(completed);
@@ -74,7 +70,7 @@ secure.post('/practicals/completed', async (req, res) => {
 secure.post('/downloadFiles', (req, res) => {
     const zipArchive = archiver('zip');
     res.attachment(nameWithStamp());
-    async.eachLimit(req.body.rows, 3, (row, done) => {
+    async.eachLimit(JSON.parse(req.body.incoming), 3, (row, done) => {
         let filename = "";
         let stream = request(`https://drive.google.com/uc?export=download&id=${row.fileid}`)
                             .on('response', res => {
@@ -113,7 +109,5 @@ function nameWithStamp() {
     }
     return `filet-${year}-${('0' + month).slice(-2)}-${('0' + day).slice(-2)}-${hours}${mins}.zip`;
 }
-
-console.log(nameWithStamp());
 
 module.exports = secure;

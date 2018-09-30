@@ -41,11 +41,20 @@ const devWebpackConfig = merge(baseWebpackConfig, {
     publicPath: config.dev.assetsPublicPath,
 	// proxy: config.dev.proxyTable,
 	proxy: {
-		'/api/**': {
-			target: 'http://localhost:5000/',
-			pathRewrite: {
-				'^/api': ''
-			}
+		// '/api/**': {
+		// 	target: 'http://localhost:5000/',
+		// 	pathRewrite: {
+		// 		'^/api': ''
+		// 	}
+		// }
+		'/entrance': {
+			target: 'http://localhost:5000'
+		},
+		'/secure/**': {
+			target: 'http://localhost:5000'
+		},
+		'/renew/**': {
+			target: 'http://localhost:5000'
 		}
 	},
     quiet: true, // necessary for FriendlyErrorsPlugin

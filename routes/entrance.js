@@ -1,5 +1,4 @@
-const bcrypt = require('bcrypt');
-const { database, express, jwt } = require('../globals');
+const { bcrypt, database, express, jwt } = require('../globals');
 
 const entrance = express.Router();
 

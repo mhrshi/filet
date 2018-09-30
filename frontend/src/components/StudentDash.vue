@@ -177,21 +177,27 @@
 					})
 				  .catch(error => {});
 			},
+
 			editItem(item) {
 				this.editedIndex = this.practicals.indexOf(item);
 				this.editedItem = Object.assign({}, item);
 				this.dialog = true;
 			},
+
 			close() {
 				this.dialog = false;
 				this.editedItem = Object.assign({}, this.defaultItem);
 				this.editedIndex = -1;
 			},
+
 			save() {
 				const link = this.editedItem.fileid;
-				if (link !== null && link.length > 0) {
-					this.editedItem.fileid = link.slice(link.indexOf('=') + 1);
+				if (link === null || (link.length > 0 && link.indexOf('=') === -1)) {
+					this.close();
+					this.showSnackbar("error", "Incorrect File ID");
+					return;
 				}
+				this.editedItem.fileid = link.slice(link.indexOf('=') + 1);
 				Object.assign(this.practicals[this.editedIndex], this.editedItem);
 				this[this.select] = this.practicals;
 				fetch('/secure/revise', {
@@ -209,16 +215,20 @@
 				}).then(res => res.json())
 				  .then(res => {
 					  if (res.code === 200) {
-						    this.snackbarColor = "success";
-							this.snackbarMessage = "File ID saved successfully";
+						    this.showSnackbar("success", "File ID saved successfully");
 					  } else {
-						    this.snackbarColor = "error";
-						    this.snackbarMessage = "Error saving File ID";
+						    this.showSnackbar("error", "Error saving File ID");
 					  }
-					  this.snackbar = true;
 				  });
 				this.close();
 			},
+
+			showSnackbar(color, message) {
+				this.snackbarColor = color;
+				this.snackbarMessage = message;
+				this.snackbar = true;
+			},
+
 			onLogout() {
 				document.cookie = 'FiletLog=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;'
 				this.$store.commit('update', {
@@ -236,10 +246,13 @@
 		},
 
 		mounted: async function() {
+			if (this.$route.params.id !== this.$store.state.username) {
+				this.$router.replace(`/student/${this.$store.state.username}`);
+			}
 			fetch('/secure/subjects')
 				.then(res => res.json())
 				.then(subjects => {
-					this.subjects = subjects;
+				    this.subjects = subjects;
 				});
 		}
 	}
