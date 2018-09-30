@@ -6,7 +6,6 @@ const path = require('path');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 const compression = require('compression');
-const nodemailer = require('nodemailer');
 
 const entranceRouter = require('./routes/entrance');
 const secureRouter = require('./routes/secure');
@@ -35,32 +34,6 @@ app.get('/*', (req, res) => {
         }
     });
 });
-
-const mailConfig = {
-    from: 'Filet App <maharshibhavsar.16.it@iite.indusuni.ac.in>',
-    to: 'bhavsarm99@gmail.com',
-    subject: 'First Filet Test Email',
-    generateTextFromHTML: true,
-    html: 'Test mail sent from Filet server'
-};
-
-function sendMail() {
-    const transporter = nodemailer.createTransport({
-        service: 'gmail',
-        auth: {
-            type: 'OAuth2',
-            user: 'maharshibhavsar.16.it@iite.indusuni.ac.in',
-            clientId: process.env.GCP_CID,
-            clientSecret: process.env.GCP_SEC,
-            refreshToken: process.env.REF_TOK,
-            accessToken: 'generateYourself'
-        }
-    });
-    transporter.sendMail(mailConfig, (error, res) => {
-        error ? console.log(error) : console.log(res);
-        transporter.close();
-    })
-}
 
 // app.post('/inFile', (req, res) => {
 //     console.log(req.body);

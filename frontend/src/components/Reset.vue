@@ -100,6 +100,9 @@
 					  }
 					  this.snackbarMessage = res.message;
 					  this.snackbar = true;
+					  setTimeout(() => {
+						  this.$router.push('/login');
+					  }, 6000);
 				  })
 			}
 		},
