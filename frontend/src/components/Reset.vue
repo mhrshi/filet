@@ -119,8 +119,8 @@
 				})
 			}).then(res => res.json())
 			  .then(res => {
-				  this.headerText = `Reset - ${res.username}`
-			  })
+				  this.headerText = `Reset - ${res.username}`;
+			  });
 		}
 	}
 </script>

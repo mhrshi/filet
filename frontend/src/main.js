@@ -7,7 +7,7 @@ const App = import('./App');
 const router = import('./router');
 const { store } = import('./store');
 
-Vue.config.productionTip = false
+Vue.config.productionTip = false;
 
 Vue.use(Vuetify);
 
