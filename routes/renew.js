@@ -14,7 +14,7 @@ async function sendMail() {
     console.log(row);
     const mailConfig = {
         from: 'Filet App <maharshibhavsar.16.it@iite.indusuni.ac.in>',
-        to: 'bhavsarm99@gmail.com',
+        to: 'khantilpujara.16.it@iite.indusuni.ac.in',
         subject: 'Password Reset',
         generateTextFromHTML: true,
         html: `Hello IU1641100036,<br/><br/>Please access the following link to reset your password:<br/>http://filet.herokuapp.com/reset/${row.id}<br/><br/>Note that above link will stay active only for an hour from now.<br/><br/>Regards,<br/>Filet`

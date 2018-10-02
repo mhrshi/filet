@@ -17,20 +17,24 @@ const webpackConfig = merge(baseWebpackConfig, {
   mode: 'production',
   module: {
     rules: utils.styleLoaders({
-      sourceMap: config.build.productionSourceMap,
+      sourceMap: false,
       extract: true,
       usePostCSS: true
     })
   },
-  devtool: config.build.productionSourceMap ? config.build.devtool : false,
+//   devtool: false,
+//   devtool: config.build.productionSourceMap ? config.build.devtool : false,
   output: {
     path: config.build.assetsRoot,
     filename: utils.assetsPath('js/[name].[chunkhash].js'),
   },
   plugins: [
+	new webpack.optimize.ModuleConcatenationPlugin(),
     // http://vuejs.github.io/vue-loader/en/workflow/production.html
     new webpack.DefinePlugin({
-      'process.env': env
+		'process.env': {
+			'NODE_ENV': JSON.stringify(process.env.NODE_ENV)
+		}
     }),
     // extract css into its own file
     new MiniCssExtractPlugin({
@@ -87,11 +91,14 @@ const webpackConfig = merge(baseWebpackConfig, {
     minimizer: [
       new UglifyJsPlugin({
         uglifyOptions: {
-          compress: {
-            warnings: false
-          }
+			warnings: false,
+			toplevel: true,
+			braces: true,
+			output: {
+				comments: false,
+				beautify: false
+			}
         },
-        sourceMap: config.build.productionSourceMap,
         parallel: true
       }),
     ],
@@ -103,7 +110,7 @@ if (config.build.productionGzip) {
 
   webpackConfig.plugins.push(
     new CompressionWebpackPlugin({
-      asset: '[path].gz[query]',
+      filename: '[path].gz[query]',
       algorithm: 'gzip',
       test: new RegExp(
         '\\.(' +

@@ -1,11 +1,11 @@
-import Vue from 'vue';
-import Router from 'vue-router';
-import Login from '@/components/Login';
-import StudentDash from '@/components/StudentDash';
-import FacultyDash from '@/components/FacultyDash';
-import Reset from '@/components/Reset';
-import FourHundredFour from '@/components/FourHundredFour';
-import { store } from '../store';
+const Vue = import('vue');
+const Router = import('vue-router');
+const Login = import('@/components/Login');
+const StudentDash = import('@/components/StudentDash');
+const FacultyDash = import('@/components/FacultyDash');
+const Reset = import('@/components/Reset');
+const FourHundredFour = import('@/components/FourHundredFour');
+const { store } = import('../store');
 
 Vue.use(Router);
 
