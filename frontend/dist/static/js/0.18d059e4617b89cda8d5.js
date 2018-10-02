@@ -1,0 +1,1 @@
+(window.webpackJsonp=window.webpackJsonp||[]).push([[0],{wNa6:function(e,n,a){"use strict";a.r(n),a.d(n,"store",function(){return u});var r=a("oCYn"),t=a("L2JU");r.default.use(t.a);var u=new t.a.Store({state:{prefix:"",username:""},mutations:{update:function(e,n){e.prefix=n.prefix,e.username=n.username}}})}}]);

@@ -1,5 +1,5 @@
-const Vue = import('vue');
-const Router = import('vue-router');
+import Vue from 'vue';
+import Router from 'vue-router';
 const Login = import('@/components/Login');
 const StudentDash = import('@/components/StudentDash');
 const FacultyDash = import('@/components/FacultyDash');
