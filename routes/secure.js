@@ -26,7 +26,7 @@ secure.use((req, res, next) => {
 secure.get('/subjects', async (req, res) => {
     try {
         const subjects = await database.many(`SELECT id, name FROM subject`);
-        res.json(subjects);
+        res.json(subjects.filter(sub => !sub.id.endsWith('04')));
     } catch(error) {
         res.send(error);
     }
@@ -48,7 +48,7 @@ secure.post('/revise', (req, res) => {
                 if (result.rowCount === 1) {
                     res.json({ code: 200 });
                 } else {
-                    res.json({ code: 500 });
+                    res.json({ code: 500, errorMessage: 'error code 500' });
                 }
             })
             .catch(error => {
@@ -100,14 +100,17 @@ function nameWithStamp() {
     const dateObject = (new Date()).toLocaleString();
     const [date, time] = dateObject.split(', ');
     const [month, day, year] = date.split('/');
-    let [hours, mins] = time.split(':');
+    let [hours, mins, secs] = time.split(':');
     if (time.endsWith('PM') && hours < 12) {
         hours = hours - 0 + 12;
     }
     if (time.endsWith('AM') && hours === '12') {
         hours = '00';
     }
-    return `filet-${year}-${('0' + month).slice(-2)}-${('0' + day).slice(-2)}-${hours}${mins}.zip`;
+    hours = ('0' + hours).slice(-2);
+    mins = ('0' + mins).slice(-2);
+    secs = ('0' + secs.split('')[0]).slice(-2);
+    return `filet-${year}-${('0' + month).slice(-2)}-${('0' + day).slice(-2)}-${hours}${mins}${secs}.zip`;
 }
 
 module.exports = secure;

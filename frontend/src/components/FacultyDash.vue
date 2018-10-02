@@ -4,8 +4,8 @@
 		<v-toolbar-title class="headline">Filet</v-toolbar-title>
 		<v-spacer></v-spacer>
 		<v-menu offset-y>
-			<v-btn slot="activator" icon>
-				<v-icon>more_vert</v-icon>
+			<v-btn slot="activator" color="primary" outline>
+				{{ this.$store.state.username }}
 			</v-btn>
 			<v-list>
 				<v-list-tile

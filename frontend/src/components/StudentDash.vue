@@ -4,8 +4,8 @@
 		<v-toolbar-title class="headline">Filet</v-toolbar-title>
 		<v-spacer></v-spacer>
 		<v-menu offset-y>
-			<v-btn slot="activator" icon>
-				<v-icon>more_vert</v-icon>
+			<v-btn slot="activator" color="primary" outline>
+				{{ this.$store.state.username }}
 			</v-btn>
 			<v-list>
 				<v-list-tile
@@ -42,7 +42,7 @@
 								<v-container>
 									<v-text-field
 										v-model="editedItem.fileid"
-										label="File ID">
+										label="Shareable link">
 									</v-text-field>
 								</v-container>
 							</v-card-text>
@@ -152,10 +152,6 @@
 
 		methods: {
 			subjectChange(subject) {
-				if (this.select.endsWith('04')) {
-					this.practicals = [];
-					return;
-				}
 				if (this[this.select].length > 0) {
 					this.practicals = this[this.select];
 					return;
@@ -184,43 +180,64 @@
 				this.dialog = true;
 			},
 
-			close() {
-				this.dialog = false;
-				this.editedItem = Object.assign({}, this.defaultItem);
-				this.editedIndex = -1;
-			},
-
 			save() {
 				const link = this.editedItem.fileid;
-				if (link === null || (link.length > 0 && link.indexOf('=') === -1)) {
+				this.dialog = false;
+				if (link.length === 0) {
+					this.editedItem.fileid = '';
+					this.handshake();
+					return;
+				}
+				if (!(/^(https:\/\/)?(www.)?drive.google.com\/open\?id=([^\s\/=]+)$/.test(link))) {
 					this.close();
-					this.showSnackbar("error", "Incorrect File ID");
+					this.showSnackbar("error", "Invalid link");
 					return;
 				}
 				this.editedItem.fileid = link.slice(link.indexOf('=') + 1);
+				this.handshake();
+			},
+
+			async handshake() {
+				try {
+					let res = await fetch('/secure/revise', {
+						method: 'POST',
+						headers: {
+							'Accept': 'application/json',
+							'Content-Type': 'application/json'
+						},
+						body: JSON.stringify({
+							subject: this.select.toLowerCase(),
+							username: this.$store.state.username,
+							fileid: this.editedItem.fileid,
+							pracid: this.editedItem.id
+						})
+					});
+					res = await res.json();
+					if (res.code === 200) {
+						this.showSnackbar("success", "File ID saved successfully");
+						this.commit();
+					} else {
+						this.showSnackbar("error", res.errorMessage);
+					}
+				} catch(error) {
+					this.showSnackbar("error", "Error saving File ID");
+				}
+				this.resetDefault();
+			},
+
+			commit() {
 				Object.assign(this.practicals[this.editedIndex], this.editedItem);
 				this[this.select] = this.practicals;
-				fetch('/secure/revise', {
-					method: 'POST',
-					headers: {
-						'Accept': 'application/json',
-						'Content-Type': 'application/json'
-					},
-					body: JSON.stringify({
-						subject: this.select.toLowerCase(),
-						username: this.$store.state.username,
-						fileid: this.editedItem.fileid,
-						pracid: this.editedItem.id
-					})
-				}).then(res => res.json())
-				  .then(res => {
-					  if (res.code === 200) {
-						    this.showSnackbar("success", "File ID saved successfully");
-					  } else {
-						    this.showSnackbar("error", "Error saving File ID");
-					  }
-				  });
-				this.close();
+			},
+
+			close() {
+				this.dialog = false;
+				this.resetDefault();
+			},
+
+			resetDefault() {
+				this.editedItem = Object.assign({}, this.defaultItem);
+				this.editedIndex = -1;
 			},
 
 			showSnackbar(color, message) {
@@ -236,12 +253,6 @@
 					username: ''
 				});
 				this.$router.push('/login');
-			}
-		},
-
-		watch: {
-			dialog(val) {
-				val || this.close();
 			}
 		},
 
