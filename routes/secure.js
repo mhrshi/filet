@@ -2,8 +2,22 @@ const { database, express, jwt } = require('../globals');
 const request = require('request');
 const async = require('async');
 const archiver = require('archiver');
+const nodemailer = require('nodemailer');
+const uuid = require('uuid/v4');
 
 const secure = express.Router();
+
+const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+        type: 'OAuth2',
+        user: 'maharshibhavsar.16.it@iite.indusuni.ac.in',
+        clientId: process.env.GCP_CID,
+        clientSecret: process.env.GCP_SEC,
+        refreshToken: process.env.REF_TOK,
+        accessToken: 'generateYourself'
+    }
+});
 
 secure.use((req, res, next) => {
     jwt.verify(req.cookies.FiletLog, process.env.LOL, (error, data) => {
@@ -22,6 +36,43 @@ secure.use((req, res, next) => {
         }
     });
 });
+
+secure.post('/restricted/resetter', async (req, res) => {
+    jwt.verify(req.cookies.FiletLog, process.env.LOL, (error, data) => {
+        if (data.username !== 'IU1641100011') {
+            res.status(401).send();
+            return;
+        }
+    });
+    try {
+        const resetid = uuid();
+        await database.none(`INSERT INTO reset VALUES ('${resetid}', '${req.body.eno}', '${Date.now()}')`);
+        const row = await database.one(`SELECT name, mail FROM student WHERE id='${req.body.eno}'`);
+        const firstName = row.name.split(' ')[0];
+        const name = firstName[0] + firstName.slice(1).toLowerCase();
+        const mailConfig = {
+            from: 'Filet App <maharshibhavsar.16.it@iite.indusuni.ac.in>',
+            to: row.mail,
+            subject: 'Password Reset',
+            generateTextFromHTML: true,
+            html: `Hello ${name},<br/><br/>Please access the following link to reset your password:<br/>http://filet.herokuapp.com/reset/${resetid}<br/><br/>Note that above link will stay active only for an hour from now.<br/><br/>Regards,<br/>Filet`
+        };
+        transporter.sendMail(mailConfig, (error, result) => {
+            if (error) {
+                console.log(error);
+                res.send({ code: 500, message: 'Error in sending mail' });
+            } else {
+                console.log(result);
+                res.send({ code: 200, message: 'Mail sent' });
+            }
+            transporter.close();
+        });
+    } catch(error) {
+        console.log(error);
+        res.send({ code: 500, message: 'Error in process' });
+    }
+
+})
 
 secure.get('/subjects', async (req, res) => {
     try {

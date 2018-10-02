@@ -1,40 +1,6 @@
 const { bcrypt, database, express } = require('../globals');
-const nodemailer = require('nodemailer');
-const uuid = require('uuid/v4');
 
 const renew = express.Router();
-
-function insertIntoReset(enrollId) {
-    const resetid = uuid();
-    database.none(`INSERT INTO reset VALUES ('${resetid}', '${enrollId}', '${Date.now()}')`);
-}
-
-async function sendMail() {
-    const row = await database.one(`SELECT * FROM reset WHERE e_no='IU1641100036'`);
-    console.log(row);
-    const mailConfig = {
-        from: 'Filet App <maharshibhavsar.16.it@iite.indusuni.ac.in>',
-        to: 'khantilpujara.16.it@iite.indusuni.ac.in',
-        subject: 'Password Reset',
-        generateTextFromHTML: true,
-        html: `Hello IU1641100036,<br/><br/>Please access the following link to reset your password:<br/>http://filet.herokuapp.com/reset/${row.id}<br/><br/>Note that above link will stay active only for an hour from now.<br/><br/>Regards,<br/>Filet`
-    };
-    const transporter = nodemailer.createTransport({
-        service: 'gmail',
-        auth: {
-            type: 'OAuth2',
-            user: 'maharshibhavsar.16.it@iite.indusuni.ac.in',
-            clientId: process.env.GCP_CID,
-            clientSecret: process.env.GCP_SEC,
-            refreshToken: process.env.REF_TOK,
-            accessToken: 'generateYourself'
-        }
-    });
-    transporter.sendMail(mailConfig, (error, res) => {
-        error ? console.log(error) : console.log(res);
-        transporter.close();
-    })
-}
 
 renew.post('/check', async (req, res) => {
     database.one(`SELECT * from reset WHERE id='${req.body.resetid}'`)

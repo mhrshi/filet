@@ -4,6 +4,7 @@ import Login from '@/components/Login';
 import StudentDash from '@/components/StudentDash';
 import FacultyDash from '@/components/FacultyDash';
 import Reset from '@/components/Reset';
+import Resetter from '@/components/Resetter';
 import FourHundredFour from '@/components/FourHundredFour';
 import { store } from '../store';
 
@@ -106,6 +107,26 @@ const router = new Router({
 						  next('/FourHundredFour');
 					  }
 				  }).catch(error => next('/FourHundredFour'));
+			}
+		},
+		{
+			path: '/resetter',
+			name: 'Resetter',
+			component: Resetter,
+			beforeEnter: (to, from, next) => {
+				fetch('/secure/check')
+					.then(res => res.json())
+					.then(res => {
+						if (res.code === 401) {
+							next('/FourHundredFour');
+						} else if (res.username === 'IU1641100011') {
+							next();
+						} else {
+							next('/FourHundredFour');
+						}
+					}).catch(error => {
+						next('/FourHundredFour');
+					});
 			}
 		},
 		{
