@@ -92,7 +92,6 @@ const webpackConfig = merge(baseWebpackConfig, {
       new UglifyJsPlugin({
         uglifyOptions: {
 			warnings: false,
-			toplevel: true,
 			braces: true,
 			output: {
 				comments: false,
