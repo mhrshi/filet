@@ -102,7 +102,7 @@ secure.post('/revise', async (req, res) => {
     try {
         const prac = await database.one(`SELECT * FROM ${req.body.subject}_pracs
                                          WHERE id=${req.body.pracid}`);
-        if ((new Date()).getTime() > prac.deadline) {
+        if (prac.deadline && (new Date()).getTime() > prac.deadline) {
             res.json({ code: 500, message: "Sorry, you're late :(" });
             return;
         }
