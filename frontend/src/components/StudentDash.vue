@@ -33,7 +33,7 @@
 							solo>
 						</v-select>
 					</v-flex>
-					<v-dialog v-model="dialog" max-width="700px">
+					<v-dialog v-model="dialog" max-width="700px" persistent>
 						<v-card>
 							<v-card-title>
 								<span class="font-weight-regular title">Edit File ID</span>
@@ -48,8 +48,8 @@
 							</v-card-text>
 							<v-card-actions>
 								<v-spacer></v-spacer>
-								<v-btn color="blue darken-1" flat @click.native="close">Cancel</v-btn>
-								<v-btn color="blue darken-1" flat @click.native="save">Save</v-btn>
+								<v-btn color="primary darken-1" flat @click.native="close">Cancel</v-btn>
+								<v-btn color="primary darken-1" flat @click.native="save">Save</v-btn>
 							</v-card-actions>
 						</v-card>
 					</v-dialog>
@@ -57,6 +57,7 @@
 						:headers="headers"
 						no-data-text="Please select a subject :)"
 						:items="practicals"
+						:loading="pracLoader"
 						hide-actions
 						must-sort
 						class="elevation-1">
@@ -64,7 +65,7 @@
 									slot-scope="props">
 							<td class="text-xs-right">{{ props.item.id }}</td>
 							<td class="text-xs-center">{{ props.item.name }}</td>
-							<td class="text-xs-center">{{ props.item.fileid }}</td>
+							<td class="text-xs-center">{{ props.item.fileid || '&horbar;' }}</td>
 							<td class="justify-center align-center layout px-0">
 								<v-icon @click="editItem(props.item)">edit</v-icon>
 							</td>
@@ -139,11 +140,10 @@
 						value: 'edit'
 					}
 				],
+				pracLoader: false,
 				practicals: [],
 				IT0501: [],
 				IT0502: [],
-				IT0504: [],
-				IT0604: [],
 				overflowItems: [
 					{ title: 'Logout' }
 				]
@@ -156,6 +156,7 @@
 					this.practicals = this[this.select];
 					return;
 				}
+				this.pracLoader = true;
 				fetch('/secure/practicals', {
 					method: 'POST',
 					headers: {
@@ -170,8 +171,11 @@
 				  .then(practicals => {
 						this.practicals = practicals;
 						this[this.select] = practicals;
+						this.pracLoader = false;
 					})
-				  .catch(error => {});
+				  .catch(error => {
+					    this.pracLoader = false;
+				  });
 			},
 
 			editItem(item) {
@@ -184,6 +188,7 @@
 				const link = this.editedItem.fileid;
 				this.dialog = false;
 				if (link.length === 0) {
+					this.pracLoader = true;
 					this.editedItem.fileid = '';
 					this.handshake();
 					return;
@@ -193,6 +198,7 @@
 					this.showSnackbar("error", "Invalid link");
 					return;
 				}
+				this.pracLoader = true;
 				this.editedItem.fileid = link.slice(link.indexOf('=') + 1);
 				this.handshake();
 			},
@@ -214,15 +220,16 @@
 					});
 					res = await res.json();
 					if (res.code === 200) {
-						this.showSnackbar("success", "File ID saved successfully");
+						this.showSnackbar("success", res.message);
 						this.commit();
 					} else {
-						this.showSnackbar("error", res.errorMessage);
+						this.showSnackbar("error", res.message);
 					}
 				} catch(error) {
 					this.showSnackbar("error", "Error saving File ID");
 				}
 				this.resetDefault();
+				this.pracLoader = false;
 			},
 
 			commit() {

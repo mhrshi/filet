@@ -85,7 +85,12 @@ secure.get('/subjects', async (req, res) => {
 
 secure.post('/practicals', async (req, res) => {
     try {
-        const practicals = await database.many(`SELECT id, name, fileid FROM ${req.body.subject} WHERE e_no='${req.body.username}' ORDER BY id ASC`);
+        // const practicals = await database.many(`SELECT id, name, fileid FROM ${req.body.subject} WHERE e_no='${req.body.username}' ORDER BY id ASC`);
+        const practicals = await database.many(`SELECT ${req.body.subject}.id, ${req.body.subject}.fileid, ${req.body.subject}.approved, ${req.body.subject}_pracs.name
+                                                FROM ${req.body.subject}
+                                                INNER JOIN ${req.body.subject}_pracs ON ${req.body.subject}.id = ${req.body.subject}_pracs.id
+                                                WHERE e_no='${req.body.username}'
+                                                ORDER BY id ASC`);
         res.json(practicals);
     } catch(error) {
         console.log(error);
@@ -93,25 +98,70 @@ secure.post('/practicals', async (req, res) => {
     }
 });
 
-secure.post('/revise', (req, res) => {
+secure.post('/revise', async (req, res) => {
+    try {
+        const prac = await database.one(`SELECT * FROM ${req.body.subject}_pracs
+                                         WHERE id=${req.body.pracid}`);
+        if ((new Date()).getTime() > prac.deadline) {
+            res.json({ code: 500, message: "Sorry, you're late :(" });
+            return;
+        }
+    } catch(error) {
+        console.log(error);
+        res.status(204).send();
+        return;
+    }
     database.result(`UPDATE ${req.body.subject} SET fileid='${req.body.fileid}' WHERE e_no='${req.body.username}' AND id=${req.body.pracid}`)
             .then(result => {
                 if (result.rowCount === 1) {
-                    res.json({ code: 200 });
+                    res.json({ code: 200, message: 'File ID saved' });
                 } else {
-                    res.json({ code: 500, errorMessage: 'error code 500' });
+                    res.json({ code: 500, message: 'error code 500' });
                 }
-            })
-            .catch(error => {
+            }).catch(error => {
                 console.log(error);
                 res.send(error);
             });
 });
 
+secure.post('/practicals/list', async (req, res) => {
+    try {
+        const list = await database.any(`SELECT *
+                                         FROM ${req.body.subject}_pracs
+                                         ORDER BY id ASC`);
+        res.json(list);
+    } catch(error) {
+        console.log(error);
+        res.status(204).send();
+    }
+});
+
+secure.post('/practicals/deadline', async (req, res) => {
+    const message = req.body.deadline === '' ? 'Deadline reset' : 'Deadline updated';
+    database.result(`UPDATE ${req.body.subject}_pracs
+                     SET deadline='${req.body.deadline}'
+                     WHERE id=${req.body.pracid}`)
+            .then(result => {
+                if (result.rowCount === 1) {
+                    res.json({ code: 200, message: message });
+                } else {
+                    res.json({ code: 500, message: 'error code 500' });
+                }
+            }).catch(error => {
+                console.log(error);
+                res.send(error);
+            })
+});
+
 secure.post('/practicals/submitted', async (req, res) => {
     try {
-        const completed = await database.any(`SELECT * FROM ${req.body.subject} WHERE fileid <> '' ORDER BY e_no ASC, id ASC`);
-        res.json(completed);
+        // const submitted = await database.any(`SELECT * FROM ${req.body.subject} WHERE fileid <> '' ORDER BY e_no ASC, id ASC`);
+        const submitted = await database.any(`SELECT ${req.body.subject}.id, ${req.body.subject}.e_no, ${req.body.subject}.fileid, ${req.body.subject}.approved, ${req.body.subject}_pracs.name
+                                              FROM ${req.body.subject}
+                                              INNER JOIN ${req.body.subject}_pracs ON ${req.body.subject}.id = ${req.body.subject}_pracs.id
+                                              WHERE fileid <> ''
+                                              ORDER BY e_no ASC, id ASC`);
+        res.json(submitted);
     } catch(error) {
         console.log(error);
         res.status(204).send(error);
