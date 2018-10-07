@@ -137,7 +137,7 @@
 							<v-flex xs12 lg8 xl8>
 								<v-data-table
 									:headers="practicalHeaders"
-									v-model="selectedPracs"
+									v-model="selected"
 									no-data-text="Nothing to display :("
 									:loading="pracLoader"
 									:items="indexedPracs"
@@ -149,7 +149,7 @@
 									<template slot="items" slot-scope="props">
 										<td>
 											<v-checkbox
-												v-model="props.selectedPracs"
+												v-model="props.selected"
 												primary
 												hide-details>
 											</v-checkbox>
@@ -157,10 +157,43 @@
 										<td class="text-xs-center">{{ props.item.e_no }}</td>
 										<td class="text-xs-right">{{ props.item.id }}</td>
 										<td class="text-xs-center">{{ props.item.name }}</td>
+										<!-- <td class="text-xs-center">
+											<template v-if="editMode">
+												<v-icon
+													v-for="(status, i) in statuses"
+													:key="i"
+													:color="props.item.status === i ? status.color : 'rgba(33, 33, 33, 0.3)'"
+													@click="changeStatus(props.item, i)">
+													{{ status.icon }}
+												</v-icon>
+											</template>
+											<template v-else>
+												<v-icon :color="statuses[props.item.status].color">
+													{{ statuses[props.item.status].icon }}
+												</v-icon>
+											</template>
+										</td> -->
 									</template>
 									<template slot="footer">
 										<td colspan="100%" class="text-xs-right">
+											<!-- <v-btn
+												v-if="editMode"
+												class="clickable"
+												flat
+												@click="cancelEdits"
+												color="primary">
+												Cancel
+											</v-btn>
 											<v-btn
+												v-if="editMode"
+												class="clickable"
+												flat
+												@click="saveEdits"
+												color="primary">
+												Save
+											</v-btn> -->
+											<v-btn
+												v-if="!editMode"
 												:disabled="throttled"
 												class="clickable"
 												flat
@@ -168,6 +201,14 @@
 												color="primary">
 												Download files
 											</v-btn>
+											<!-- <v-btn
+												v-if="!editMode"
+												class="clickable"
+												color="primary"
+												@click="activateEdits"
+												flat>
+												EDIT
+											</v-btn> -->
 										</td>
 									</template>
 								</v-data-table>
@@ -267,10 +308,31 @@
 						sortable: false,
 						value: 'name'
 					}
+					// {
+					// 	text: 'Status',
+					// 	align: 'center',
+					// 	sortable: false,
+					// 	value: 'status'
+					// }
 				],
 				pracLoader: false,
-				selectedPracs: [],
+				selected: [],
+				// statuses: [
+				// 	{
+				// 		icon: 'check_circle',
+				// 		color: 'success'
+				// 	},
+				// 	{
+				// 		icon: 'remove_circle',
+				// 		color: 'primary'
+				// 	},
+				// 	{
+				// 		icon: 'cancel',
+				// 		color: 'error'
+				// 	}
+				// ],
 				throttled: false,
+				// editMode: false,
 				list: [],
 				practicals: [],
 				snackbar: false,
@@ -292,14 +354,15 @@
 
 		methods: {
 			downloadFiles() {
-				if (this.selectedPracs.length <= 0) {
+				if (this.selected.length <= 0) {
+					this.showSnackbar('primary', 'No practicals selected');
 					return;
 				}
 				this.throttled = true;
 				setTimeout(() => {
 					this.throttled = false;
 				}, 20000);
-				this.$refs.dummyinput.value = JSON.stringify(this.selectedPracs);
+				this.$refs.dummyinput.value = JSON.stringify(this.selected);
 				this.$refs.dummyform.submit();
 			},
 
@@ -379,6 +442,25 @@
 				this.editedItem = Object.assign({}, this.defaultItem);
 				this.editedIndex = -1;
 			},
+
+			// changeStatus(item, i) {
+			// 	Object.assign(this.practicals[item.uuid], {
+			// 		...item,
+			// 		status: i
+			// 	});
+			// },
+
+			// activateEdits() {
+			// 	this.editMode = true;
+			// },
+
+			// cancelEdits() {
+			// 	this.editMode = false;
+			// },
+
+			// saveEdits() {
+			// 	this.editMode = false;
+			// },
 
 			showSnackbar(color, message) {
 				this.snackbarColor = color;
@@ -460,5 +542,9 @@
 
 	.clickable {
 		cursor: pointer;
+	}
+
+	td {
+		white-space: nowrap;
 	}
 </style>

@@ -76,8 +76,8 @@ secure.post('/restricted/resetter', async (req, res) => {
 
 secure.get('/subjects', async (req, res) => {
     try {
-        const subjects = await database.many(`SELECT id, name FROM subject`);
-        res.json(subjects.filter(sub => !sub.id.endsWith('04')));
+        const subjects = await database.many(`SELECT id, name FROM subject WHERE id='IT0501'`);
+        res.json(subjects);
     } catch(error) {
         res.send(error);
     }
@@ -86,7 +86,7 @@ secure.get('/subjects', async (req, res) => {
 secure.post('/practicals', async (req, res) => {
     try {
         // const practicals = await database.many(`SELECT id, name, fileid FROM ${req.body.subject} WHERE e_no='${req.body.username}' ORDER BY id ASC`);
-        const practicals = await database.many(`SELECT ${req.body.subject}.id, ${req.body.subject}.fileid, ${req.body.subject}.approved, ${req.body.subject}_pracs.name
+        const practicals = await database.many(`SELECT ${req.body.subject}.id, ${req.body.subject}.fileid, ${req.body.subject}.status, ${req.body.subject}_pracs.name
                                                 FROM ${req.body.subject}
                                                 INNER JOIN ${req.body.subject}_pracs ON ${req.body.subject}.id = ${req.body.subject}_pracs.id
                                                 WHERE e_no='${req.body.username}'
@@ -156,7 +156,7 @@ secure.post('/practicals/deadline', async (req, res) => {
 secure.post('/practicals/submitted', async (req, res) => {
     try {
         // const submitted = await database.any(`SELECT * FROM ${req.body.subject} WHERE fileid <> '' ORDER BY e_no ASC, id ASC`);
-        const submitted = await database.any(`SELECT ${req.body.subject}.id, ${req.body.subject}.e_no, ${req.body.subject}.fileid, ${req.body.subject}.approved, ${req.body.subject}_pracs.name
+        const submitted = await database.any(`SELECT ${req.body.subject}.id, ${req.body.subject}.e_no, ${req.body.subject}.fileid, ${req.body.subject}.status, ${req.body.subject}_pracs.name
                                               FROM ${req.body.subject}
                                               INNER JOIN ${req.body.subject}_pracs ON ${req.body.subject}.id = ${req.body.subject}_pracs.id
                                               WHERE fileid <> ''

@@ -12,6 +12,12 @@ export const store = new Vuex.Store({
 		update(state, payload) {
 			state.prefix = payload.prefix;
 			state.username = payload.username;
+		},
+		reset(state) {
+			Object.assign(state, {
+				prefix: '',
+				username: ''
+			})
 		}
 	}
 });

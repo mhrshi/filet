@@ -285,4 +285,8 @@
 	.edit-icon {
 		cursor: pointer;
 	}
+
+	td {
+		white-space: nowrap;
+	}
 </style>
