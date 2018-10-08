@@ -7,17 +7,17 @@ const uuid = require('uuid/v4');
 
 const secure = express.Router();
 
-// const transporter = nodemailer.createTransport({
-//     service: 'gmail',
-//     auth: {
-//         type: 'OAuth2',
-//         user: 'maharshibhavsar.16.it@iite.indusuni.ac.in',
-//         clientId: process.env.GCP_CID,
-//         clientSecret: process.env.GCP_SEC,
-//         refreshToken: process.env.REF_TOK,
-//         accessToken: 'generateYourself'
-//     }
-// });
+const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+        type: 'OAuth2',
+        user: 'maharshibhavsar.16.it@iite.indusuni.ac.in',
+        clientId: process.env.GCP_CID,
+        clientSecret: process.env.GCP_SEC,
+        refreshToken: process.env.REF_TOK,
+        accessToken: 'generateYourself'
+    }
+});
 
 secure.use((req, res, next) => {
     jwt.verify(req.cookies.FiletLog, process.env.LOL, (error, data) => {
