@@ -4,6 +4,8 @@ import Vuex from 'vuex';
 Vue.use(Vuex);
 
 export const store = new Vuex.Store({
+	strict: true,
+
 	state: {
 		prefix: '',
 		username: '',
@@ -13,12 +15,30 @@ export const store = new Vuex.Store({
 			E3: []
 		},
 		filter: {
-			start: -1,
-			end: -1,
+			enroll: -1,
 			pracid: -1,
 			type: ''
 		}
 	},
+
+	getters: {
+		filtered: state => batch => {
+			if (!batch.name) {
+				return [];
+			}
+			if (!state.filter.type) {
+				return state.practicals[batch.name];
+			}
+			if (state.filter.type === 'prac') {
+				return state.practicals[batch.name]
+							.filter(prac => prac.id === state.filter.pracid);
+			} else {
+				return state.practicals[batch.name]
+							.filter(prac => prac.e_no.endsWith(state.filter.enroll));
+			}
+		}
+	},
+
 	mutations: {
 		update(state, payload) {
 			state.prefix = payload.prefix;
@@ -43,14 +63,18 @@ export const store = new Vuex.Store({
 
 		updateEnrolFilter(state, payload) {
 			state.filter.type = 'eno';
-			state.filter.start = payload.start;
-			state.filter.end = payload.end;
+			state.filter.enroll = `${('0' + payload.enroll).slice(-2)}`;
+		},
+
+		updateStatii(state, { batch, statii }) {
+			statii.forEach(entry => {
+				state.practicals[batch.name][entry.uuid].status = entry.status;
+			})
 		},
 
 		resetFilter(state) {
 			state.filter = {
-				start: -1,
-				end: -1,
+				enroll: -1,
 				pracid: -1,
 				type: ''
 			}

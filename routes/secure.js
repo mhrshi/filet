@@ -85,7 +85,6 @@ secure.get('/subjects', async (req, res) => {
 
 secure.post('/practicals', async (req, res) => {
     try {
-        // const practicals = await database.many(`SELECT id, name, fileid FROM ${req.body.subject} WHERE e_no='${req.body.username}' ORDER BY id ASC`);
         const practicals = await database.many(`SELECT ${req.body.subject}.id, ${req.body.subject}.fileid, ${req.body.subject}.status, ${req.body.subject}_pracs.name
                                                 FROM ${req.body.subject}
                                                 INNER JOIN ${req.body.subject}_pracs ON ${req.body.subject}.id = ${req.body.subject}_pracs.id
@@ -136,6 +135,22 @@ secure.post('/practicals/list', async (req, res) => {
     }
 });
 
+secure.post('/practicals/update/status', async (req, res) => {
+    console.log(`status updation started`);
+    try {
+        const updations = req.body.updations;
+        for (update of updations) {
+            await database.none(`UPDATE ${req.body.subject}
+                                 SET status=${update.status}
+                                 WHERE e_no='${update.e_no}' AND id=${update.pracid}`);
+        }
+        res.json({ code: 200, message: 'Status(es) updated' });
+    } catch (error) {
+        console.log(error);
+        res.send(error);
+    }
+});
+
 secure.post('/practicals/deadline', async (req, res) => {
     const message = req.body.deadline === '' ? 'Deadline reset' : 'Deadline updated';
     database.result(`UPDATE ${req.body.subject}_pracs
@@ -155,7 +170,6 @@ secure.post('/practicals/deadline', async (req, res) => {
 
 secure.post('/practicals/submitted', async (req, res) => {
     try {
-        // const submitted = await database.any(`SELECT * FROM ${req.body.subject} WHERE fileid <> '' ORDER BY e_no ASC, id ASC`);
         const submitted = await database.any(`SELECT ${req.body.subject}.id, ${req.body.subject}.e_no, ${req.body.subject}.fileid, ${req.body.subject}.status, ${req.body.subject}_pracs.name
                                               FROM ${req.body.subject}
                                               INNER JOIN ${req.body.subject}_pracs ON ${req.body.subject}.id = ${req.body.subject}_pracs.id

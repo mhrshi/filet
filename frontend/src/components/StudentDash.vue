@@ -39,11 +39,15 @@
 								<span class="font-weight-regular title">Edit File ID</span>
 							</v-card-title>
 							<v-card-text>
-								<v-container>
-									<v-text-field
-										v-model="editedItem.fileid"
-										label="Shareable link">
-									</v-text-field>
+								<v-container grid-list-md>
+									<v-flex>
+										<v-text-field
+											v-if="dialog"
+											v-model="editedItem.fileid"
+											label="Shareable link"
+											autofocus>
+										</v-text-field>
+									</v-flex>
 								</v-container>
 							</v-card-text>
 							<v-card-actions>
@@ -66,6 +70,17 @@
 							<td class="text-xs-right">{{ props.item.id }}</td>
 							<td class="text-xs-center">{{ props.item.name }}</td>
 							<td class="text-xs-center">{{ props.item.fileid || '&horbar;' }}</td>
+							<td class="text-xs-center">
+								<v-tooltip
+									open-delay="600"
+									close-delay="0"
+									top>
+									<v-icon class="default-cursor" slot="activator" :color="statuses[props.item.status].color">
+										{{ statuses[props.item.status].icon }}
+									</v-icon>
+									<span>{{ statuses[props.item.status].desc }}</span>
+								</v-tooltip>
+							</td>
 							<td class="justify-center align-center layout px-0">
 								<v-icon @click="editItem(props.item)">edit</v-icon>
 							</td>
@@ -134,16 +149,38 @@
 						value: 'fileid'
 					},
 					{
+						text: 'Status',
+						align: 'center',
+						sortable: false,
+						value: 'status'
+					},
+					{
 						text: 'Edit',
 						align: 'center',
 						sortable: false,
 						value: 'edit'
 					}
 				],
+				statuses: [
+					{
+						icon: 'check_circle',
+						color: 'success',
+						desc: 'Accepted'
+					},
+					{
+						icon: 'remove_circle',
+						color: 'primary',
+						desc: 'Pending'
+					},
+					{
+						icon: 'cancel',
+						color: 'error',
+						desc: 'Rejected'
+					}
+				],
 				pracLoader: false,
 				practicals: [],
 				IT0501: [],
-				IT0502: [],
 				overflowItems: [
 					{ title: 'Logout' }
 				]
@@ -288,5 +325,9 @@
 
 	td {
 		white-space: nowrap;
+	}
+
+	.default-cursor {
+		cursor: default;
 	}
 </style>

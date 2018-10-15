@@ -139,6 +139,7 @@
 									<v-select
 										ref="batchSelect"
 										v-model="batchSelect"
+										:disabled="reviewMode"
 										@change="batchChange"
 										class="select-subject"
 										:items="batches"
@@ -154,9 +155,10 @@
 								<v-data-table
 									:headers="practicalHeaders"
 									v-model="selected"
-									no-data-text="No matching results found"
+									:pagination.sync="pagination"
+									:no-data-text="batchSelect.name ? 'No matching results found' : 'Please select a batch to continue'"
 									:loading="pracLoader"
-									:items="indexedPracs"
+									:items="reviewMode ? reviewPracs : indexedPracs"
 									item-key="uuid"
 									:rows-per-page-items="rowsPerPageItems"
 									must-sort
@@ -173,32 +175,47 @@
 										<td class="text-xs-center">{{ props.item.e_no }}</td>
 										<td class="text-xs-right">{{ props.item.id }}</td>
 										<td class="text-xs-center">{{ props.item.name }}</td>
-										<!-- <td class="text-xs-center">
+										<td class="text-xs-center">
 											<template v-if="reviewMode">
-												<v-icon
-													v-for="(status, i) in statuses"
-													:key="i"
-													:color="props.item.status === i ? status.color : 'rgba(33, 33, 33, 0.3)'"
-													@click="changeStatus(props.item, i)">
-													{{ status.icon }}
-												</v-icon>
+													<v-tooltip
+														v-for="(status, i) in statuses"
+														open-delay="600"
+														close-delay="0"
+														:key="i"
+														top>
+														<v-icon
+															:key="i"
+															slot="activator"
+															class="ml-1"
+															:color="props.item.status === i ? status.color : 'rgba(33, 33, 33, 0.3)'"
+															@click="changeStatus(props.item, i)">
+															{{ status.icon }}
+														</v-icon>
+														<span>{{ status.desc }}</span>
+													</v-tooltip>
 											</template>
 											<template v-else>
-												<v-icon :color="statuses[props.item.status].color">
-													{{ statuses[props.item.status].icon }}
-												</v-icon>
+												<v-tooltip
+													open-delay="600"
+													close-delay="0"
+													top>
+													<v-icon class="default-cursor" slot="activator" :color="statuses[props.item.status].color">
+														{{ statuses[props.item.status].icon }}
+													</v-icon>
+													<span>{{ statuses[props.item.status].desc }}</span>
+												</v-tooltip>
 											</template>
-										</td> -->
+										</td>
 									</template>
 									<template slot="footer">
 										<td colspan="100%" class="text-xs-right">
-											<!-- <v-btn
+											<v-btn
 												v-if="reviewMode"
 												class="clickable"
 												flat
 												@click="cancelReviews"
 												color="primary">
-												Cancel
+												CANCEL
 											</v-btn>
 											<v-btn
 												v-if="reviewMode"
@@ -206,10 +223,11 @@
 												flat
 												@click="saveReviews"
 												color="primary">
-												Save
-											</v-btn> -->
+												SAVE
+											</v-btn>
 											<v-btn
-												:disabled="indexedPracs.length === 0"
+												v-if="!reviewMode"
+												:disabled="!batchSelect.name"
 												class="clickable"
 												flat
 												@click="filterDialog = true"
@@ -217,14 +235,15 @@
 												FILTER
 											</v-btn>
 											<v-btn
+												v-if="!reviewMode"
 												:disabled="throttled || indexedPracs.length === 0"
 												class="clickable"
 												flat
 												@click="downloadFiles"
 												color="primary">
-												Download files
+												DOWNLOAD FILES
 											</v-btn>
-											<!-- <v-btn
+											<v-btn
 												v-if="!reviewMode"
 												:disabled="indexedPracs.length === 0"
 												class="clickable"
@@ -232,7 +251,7 @@
 												@click="activateReviews"
 												flat>
 												REVIEW
-											</v-btn> -->
+											</v-btn>
 										</td>
 									</template>
 								</v-data-table>
@@ -260,7 +279,7 @@
 													</v-radio-group>
 												</v-flex>
 												<v-flex
-													xs12 sm6 md4
+													xs12 sm7 md6
 													v-if="viewBy === 'prac'">
 													<v-select
 														v-model="filteredPrac"
@@ -268,15 +287,27 @@
 														label="Practical"
 														item-text="name"
 														item-value="id"
-														box>
+														box
+														clearable>
 													</v-select>
 												</v-flex>
 												<v-flex
+													class="enroll-wrap"
 													xs12 sm12 md12
 													v-else>
-													<v-range-slider
-														class="mt-4 mr-3 ml-3"
+													<!-- <v-text-field
 														v-model="enrollSlider"
+
+														class="mb-0 wrap-left"
+														type="number"
+														step="1"
+														hide-details
+														single-line>
+													</v-text-field> -->
+													<v-slider
+														class="mt-4 mr-3 ml-2"
+														v-model="enrollSlider"
+														@wheel.native="enrollScroll"
 														:min="minEnroll"
 														:max="maxEnroll"
 														step="1"
@@ -284,15 +315,16 @@
 														ticks="always"
 														tick-size="2"
 														thumb-label="always"
-														hint="Overlap both thumbs to select single value"
-														persistent-hint>
-													</v-range-slider>
+														hint="Scroll or drag the thumb to change value"
+														persistent-hint
+														always-dirty>
+													</v-slider>
 												</v-flex>
 											</v-container>
 										</v-card-text>
 										<v-card-actions>
 											<v-spacer></v-spacer>
-											<v-btn color="blue darken-1" flat @click.native="cancelFilter">CANCEL</v-btn>
+											<v-btn color="blue darken-1" flat @click.native="clearFilter">CLEAR</v-btn>
 											<v-btn color="blue darken-1" flat @click="applyFilter">APPLY</v-btn>
 										</v-card-actions>
 									</v-card>
@@ -392,32 +424,37 @@
 						align: 'center',
 						sortable: false,
 						value: 'name'
+					},
+					{
+						text: 'Status',
+						align: 'center',
+						sortable: false,
+						value: 'status'
 					}
-					// {
-					// 	text: 'Status',
-					// 	align: 'center',
-					// 	sortable: false,
-					// 	value: 'status'
-					// }
 				],
+				pagination: {},
 				pracLoader: false,
 				selected: [],
-				// statuses: [
-				// 	{
-				// 		icon: 'check_circle',
-				// 		color: 'success'
-				// 	},
-				// 	{
-				// 		icon: 'remove_circle',
-				// 		color: 'primary'
-				// 	},
-				// 	{
-				// 		icon: 'cancel',
-				// 		color: 'error'
-				// 	}
-				// ],
+				statuses: [
+					{
+						icon: 'check_circle',
+						color: 'success',
+						desc: 'Accepted'
+					},
+					{
+						icon: 'remove_circle',
+						color: 'primary',
+						desc: 'Pending'
+					},
+					{
+						icon: 'cancel',
+						color: 'error',
+						desc: 'Rejected'
+					}
+				],
 				throttled: false,
-				// reviewMode: false,
+				reviewMode: false,
+				reviewPracs: undefined,
 				batchSelect: {},
 				batches: [
 					{
@@ -439,8 +476,8 @@
 				list: [],
 				filterDialog: false,
 				viewBy: 'prac',
-				filteredPrac: -1,
-				enrollSlider: [1, 25],
+				filteredPrac: undefined,
+				enrollSlider: this.maxEnroll,
 				minEnroll: 1,
 				maxEnroll: 25,
 				snackbar: false,
@@ -450,13 +487,14 @@
 					{ title: 'Logout' }
 				],
 				rowsPerPageItems: [
+					5,
 					10,
-					25,
 					{
 						"text": "$vuetify.dataIterator.rowsPerPageAll",
 						"value": -1
 					}
-				]
+				],
+				uuids: undefined
 			}
 		},
 
@@ -551,36 +589,93 @@
 				this.editedIndex = -1;
 			},
 
-			// changeStatus(item, i) {
-			// 	Object.assign(this.indexedPracs[item.uuid], {
-			// 		...item,
-			// 		status: i
-			// 	});
-			// },
+			changeStatus(item, newStatus) {
+				const index = this.reviewPracs.findIndex(prac => prac.uuid === item.uuid);
+				if (this.reviewPracs[index].status === newStatus) {
+					return;
+				}
+				this.$set(this.reviewPracs, index, {
+					...item,
+					status: newStatus
+				});
+				this.uuids.add(index);
+			},
 
-			// activateReviews() {
-			// 	this.reviewMode = true;
-			// },
+			activateReviews() {
+				this.reviewMode = true;
+				this.reviewPracs = [...this.$store.getters.filtered(this.batchSelect)];
+				this.uuids = new Set();
+			},
 
-			// cancelReviews() {
-			// 	this.reviewMode = false;
-			// },
+			cancelReviews() {
+				this.reviewMode = false;
+				this.reviewPracs = undefined;
+				this.uuids = undefined;
+			},
 
-			// saveReviews() {
-			// 	this.reviewMode = false;
-			// },
+			async saveReviews() {
+				if (this.uuids.size === 0) {
+					this.cancelReviews();
+					return;
+				}
+				this.pracLoader = true;
+				try {
+					let res = await fetch('/secure/practicals/update/status', {
+						method: 'POST',
+						headers: {
+							'Accept': 'application/json',
+							'Content-Type': 'application/json'
+						},
+						body: JSON.stringify({
+							subject: this.$store.state.username.slice(3).toLowerCase(),
+							updations: [...this.uuids].map(i => {
+								const { id: pracid, e_no, status } = this.reviewPracs[i];
+								return { pracid, e_no, status };
+							})
+						})
+					});
+					res = await res.json();
+					if (res.code === 200) {
+						this.showSnackbar("success", res.message);
+						this.$store.commit({
+							type: 'updateStatii',
+							batch: this.batchSelect,
+							statii: [...this.uuids].map(i => {
+								const { uuid, status } = this.reviewPracs[i];
+								return { uuid, status };
+							})
+						});
+					} else {
+						this.showSnackbar("error", res.message);
+					}
+				} catch(error) {
+					this.showSnackbar("error", "Error updating status(es)");
+				}
+				this.cancelReviews();
+				this.pracLoader = false;
+			},
 
 			batchChange(batch) {
+				this.pagination.page = 1;
 				[this.minEnroll, this.maxEnroll]
 					= batch.range.split('-').map(each => Number(each));
-				this.enrollSlider = [this.minEnroll, this.maxEnroll];
+				this.enrollSlider = this.maxEnroll;
 				this.$store.commit('resetFilter');
 			},
 
+			enrollScroll(e) {
+				if (e.deltaY > 0) {
+					this.enrollSlider--;
+				} else {
+					this.enrollSlider++;
+				}
+			},
+
 			applyFilter() {
+				this.pagination.page = 1;
 				this.filterDialog = false;
 				if (this.viewBy === 'prac') {
-					if (this.filteredPrac === -1) {
+					if (this.filteredPrac === undefined) {
 						this.batchChange(this.batchSelect);
 						return;
 					}
@@ -589,24 +684,19 @@
 						pracid: this.filteredPrac
 					});
 				} else {
-					if (this.enrollSlider[0] === this.minEnroll
-						&& this.enrollSlider[1] === this.maxEnroll) {
-						this.batchChange(this.batchSelect);
-						return;
-					}
 					this.$store.commit({
 						type: 'updateEnrolFilter',
-						start: this.enrollSlider[0],
-						end: this.enrollSlider[1]
+						enroll: this.enrollSlider,
 					});
 				}
 			},
 
-			cancelFilter() {
+			clearFilter() {
+				this.pagination.page = 1;
 				this.filterDialog = false;
 				this.viewBy = 'prac';
-				this.enrollSlider = [this.minEnroll, this.maxEnroll];
-				this.filteredPrac = -1;
+				this.filteredPrac = undefined;
+				this.batchChange(this.batchSelect);
 			},
 
 			showSnackbar(color, message) {
@@ -632,7 +722,7 @@
 
 		watch: {
 			tabModel(val) {
-				if (val === 'tab-1' && Object.keys(this.batchSelect).length === 0) {
+				if (val === 'tab-1' && !this.batchSelect.name) {
 					this.pracLoader = true;
 					fetch('/secure/practicals/submitted', {
 						method: 'POST',
@@ -680,21 +770,7 @@
 
 		computed: {
     		indexedPracs() {
-      			if (Object.keys(this.batchSelect).length === 0) {
-					return [];
-				}
-				if (!this.$store.state.filter.type) {
-					return this.$store.state.practicals[this.batchSelect.name];
-				}
-				if (this.$store.state.filter.type === 'prac') {
-					return this.$store.state.practicals[this.batchSelect.name]
-											.filter(prac => prac.id === this.$store.state.filter.pracid);
-				} else {
-					return this.$store.state.practicals[this.batchSelect.name]
-											.filter(prac => this.inRange(prac.e_no,
-																		 this.$store.state.filter.start,
-																		 this.$store.state.filter.end));
-				}
+				return this.$store.getters.filtered(this.batchSelect);
     		}
   		},
 
@@ -740,4 +816,21 @@
 	td {
 		white-space: nowrap;
 	}
+
+	.default-cursor {
+		cursor: default;
+	}
+
+	/* .enroll-wrap {
+		display: flex;
+	}
+
+	.wrap-left {
+		flex-basis: 7%;
+		margin-top: -4px;
+	}
+
+	.wrap-right {
+		flex-basis: 93%;
+	} */
 </style>
