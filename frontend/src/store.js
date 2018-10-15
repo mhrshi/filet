@@ -45,13 +45,6 @@ export const store = new Vuex.Store({
 			state.username = payload.username;
 		},
 
-		resetStore(state) {
-			Object.assign(state, {
-				prefix: '',
-				username: ''
-			})
-		},
-
 		setPracticals(state, payload) {
 			Object.assign(state.practicals[payload.batch], payload.data);
 		},
@@ -72,12 +65,23 @@ export const store = new Vuex.Store({
 			})
 		},
 
+		updateCode(state, { code, uuid, batch }) {
+			state.practicals[batch.name][uuid].code = code;
+		},
+
 		resetFilter(state) {
 			state.filter = {
 				enroll: -1,
 				pracid: -1,
 				type: ''
 			}
-		}
+		},
+
+		resetState(state) {
+			Object.assign(state, {
+				prefix: '',
+				username: ''
+			})
+		},
 	}
 });

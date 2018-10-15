@@ -136,7 +136,6 @@ secure.post('/practicals/list', async (req, res) => {
 });
 
 secure.post('/practicals/update/status', async (req, res) => {
-    console.log(`status updation started`);
     try {
         const updations = req.body.updations;
         for (update of updations) {
@@ -180,6 +179,12 @@ secure.post('/practicals/submitted', async (req, res) => {
         console.log(error);
         res.status(204).send(error);
     }
+});
+
+secure.post('/downloadBlob', (req, res) => {
+    request(`https://drive.google.com/uc?export=download&id=${req.body.fileid}`, (error, response, body) => {
+        res.send(body);
+    })
 });
 
 secure.post('/downloadFiles', (req, res) => {

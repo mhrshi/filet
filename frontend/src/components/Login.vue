@@ -98,6 +98,7 @@ export default {
 				  }
 			  });
 		},
+
 		onFocus: function() {
 			this.idError = '';
 			this.pwdError = '';

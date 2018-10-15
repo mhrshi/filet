@@ -161,10 +161,12 @@
 									:items="reviewMode ? reviewPracs : indexedPracs"
 									item-key="uuid"
 									:rows-per-page-items="rowsPerPageItems"
+									sort-icon="visibility"
 									must-sort
 									select-all
 									class="elevation-1">
 									<template slot="items" slot-scope="props">
+										<tr >
 										<td>
 											<v-checkbox
 												v-model="props.selected"
@@ -174,7 +176,7 @@
 										</td>
 										<td class="text-xs-center">{{ props.item.e_no }}</td>
 										<td class="text-xs-right">{{ props.item.id }}</td>
-										<td class="text-xs-center">{{ props.item.name }}</td>
+										<td class="text-xs-center eye-cursor" @click="openPracDialog(props.item)">{{ props.item.name }}</td>
 										<td class="text-xs-center">
 											<template v-if="reviewMode">
 													<v-tooltip
@@ -206,6 +208,7 @@
 												</v-tooltip>
 											</template>
 										</td>
+										</tr>
 									</template>
 									<template slot="footer">
 										<td colspan="100%" class="text-xs-right">
@@ -329,6 +332,21 @@
 										</v-card-actions>
 									</v-card>
 								</v-dialog>
+								<v-dialog
+									v-model="pracDialog.open"
+									transition="dialog-bottom-transition"
+									fullscreen
+									hide-overlay>
+									<v-card>
+										<v-toolbar prominent dark color="primary">
+											<v-btn icon dark @click.native="closePracDialog">
+												<v-icon>close</v-icon>
+											</v-btn>
+											<v-toolbar-title class="headline font-weight-regular">{{ pracDialog.title }}</v-toolbar-title>
+										</v-toolbar>
+										<div class="pa-4 subheading code">{{ pracDialog.content }}</div>
+									</v-card>
+								</v-dialog>
 							</v-flex>
 						</v-layout>
 					</v-container>
@@ -362,6 +380,7 @@
 		name: 'FacultyDash',
 		data() {
 			return {
+				offsetTop: 0,
 				tabs: ["Practicals", "Submissions"],
 				tabModel: 'tab-0',
 				listHeaders: [
@@ -480,6 +499,8 @@
 				enrollSlider: this.maxEnroll,
 				minEnroll: 1,
 				maxEnroll: 25,
+				pracDialog: { open: false, title: '', content: 'Downloading code...' },
+				fileReader: new FileReader(),
 				snackbar: false,
 				snackbarMessage: '',
 				snackbarColor: '',
@@ -587,6 +608,43 @@
 				this.inputtedTime = null;
 				this.editedItem = Object.assign({}, this.defaultItem);
 				this.editedIndex = -1;
+			},
+
+			openPracDialog(item) {
+				this.pracDialog.title = `${item.name} - ${item.e_no}`;
+				this.pracDialog.open = true;
+				const code = this.$store.state.practicals[this.batchSelect.name][item.uuid].code;
+				if (code) {
+					this.pracDialog.content = code;
+					return;
+				}
+				fetch('/secure/downloadBlob', {
+					method: 'POST',
+						headers: {
+							'Accept': 'application/json',
+							'Content-Type': 'application/json'
+						},
+						body: JSON.stringify({
+							fileid: item.fileid
+						})
+				}).then(res => res.blob())
+				  .then(blob => {
+					  this.fileReader.onload = (e) => {
+						  this.pracDialog.content = e.target.result;
+						  this.$store.commit({
+							  type: 'updateCode',
+							  code: e.target.result,
+							  uuid: item.uuid,
+							  batch: this.batchSelect
+						  });
+					  }
+					  this.fileReader.readAsText(blob);
+				  });
+			},
+
+			closePracDialog() {
+				this.pracDialog.open = false;
+				this.pracDialog.content = 'Downloading code...';
 			},
 
 			changeStatus(item, newStatus) {
@@ -706,12 +764,9 @@
 			},
 
 			onLogout() {
-				document.cookie = 'FiletLog=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;'
-				this.$store.commit('update', {
-					prefix: '',
-					username: ''
-				});
+				document.cookie = 'FiletLog=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
 				this.$router.push('/login');
+				this.$store.commit('resetState');
 			},
 
 			inRange(enroll, start, end) {
@@ -819,6 +874,15 @@
 
 	.default-cursor {
 		cursor: default;
+	}
+
+	.code {
+		font-family: 'Roboto Mono';
+		white-space: pre-wrap;
+	}
+
+	.eye-cursor {
+		cursor: url('./eye.svg'), pointer;
 	}
 
 	/* .enroll-wrap {

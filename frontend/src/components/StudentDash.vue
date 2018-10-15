@@ -75,7 +75,10 @@
 									open-delay="600"
 									close-delay="0"
 									top>
-									<v-icon class="default-cursor" slot="activator" :color="statuses[props.item.status].color">
+									<v-icon
+										class="default-cursor"
+										slot="activator"
+										:color="props.item.fileid ? statuses[props.item.status].color : 'rgba(33, 33, 33, 0.3)'">
 										{{ statuses[props.item.status].icon }}
 									</v-icon>
 									<span>{{ statuses[props.item.status].desc }}</span>
@@ -291,12 +294,9 @@
 			},
 
 			onLogout() {
-				document.cookie = 'FiletLog=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;'
-				this.$store.commit('update', {
-					prefix: '',
-					username: ''
-				});
+				document.cookie = 'FiletLog=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
 				this.$router.push('/login');
+				this.$store.commit('resetState');
 			}
 		},
 
