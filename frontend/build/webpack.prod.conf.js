@@ -1,5 +1,6 @@
 'use strict'
 const path = require('path')
+// const glob = require('glob-all')
 const utils = require('./utils')
 const webpack = require('webpack')
 const config = require('../config')
@@ -10,6 +11,7 @@ const HtmlWebpackPlugin = require('html-webpack-plugin')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 const OptimizeCSSPlugin = require('optimize-css-assets-webpack-plugin')
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin')
+// const PurifyCssPlugin = require('purifycss-webpack')
 
 const env = require('../config/prod.env')
 
@@ -46,7 +48,18 @@ const webpackConfig = merge(baseWebpackConfig, {
       cssProcessorOptions: config.build.productionSourceMap
         ? { safe: true, map: { inline: false } }
         : { safe: true }
-    }),
+	}),
+
+	// new PurifyCssPlugin({
+	// 	paths: glob.sync([
+	// 		'/frontend/index.html',
+	// 		'/frontend/src/components/*.vue',
+	// 		'/frontend/src/*.vue',
+	// 		'/frontend/src/*.js',
+	// 		'/frontend/src/router/*.js'
+	// 	  ])
+	// }),
+
     // generate dist index.html with correct asset hash for caching.
     // you can customize output by editing /index.html
     // see https://github.com/ampedandwired/html-webpack-plugin
