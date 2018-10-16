@@ -660,6 +660,7 @@
 			},
 
 			activateReviews() {
+				this.showSnackbar('primary', 'Review mode: ON');
 				this.reviewMode = true;
 				this.reviewPracs = [...this.$store.getters.filtered(this.batchSelect)];
 				this.uuids = new Set();

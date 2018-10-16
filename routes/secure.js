@@ -138,11 +138,11 @@ secure.post('/practicals/list', async (req, res) => {
 secure.post('/practicals/update/status', async (req, res) => {
     try {
         const updations = req.body.updations;
-        for (update of updations) {
-            await database.none(`UPDATE ${req.body.subject}
-                                 SET status=${update.status}
-                                 WHERE e_no='${update.e_no}' AND id=${update.pracid}`);
-        }
+        // for (update of updations) {
+        //     await database.none(`UPDATE ${req.body.subject}
+        //                          SET status=${update.status}
+        //                          WHERE e_no='${update.e_no}' AND id=${update.pracid}`);
+        // }
         res.json({ code: 200, message: 'Status(es) updated' });
     } catch (error) {
         console.log(error);
@@ -152,19 +152,20 @@ secure.post('/practicals/update/status', async (req, res) => {
 
 secure.post('/practicals/deadline', async (req, res) => {
     const message = req.body.deadline === '' ? 'Deadline reset' : 'Deadline updated';
-    database.result(`UPDATE ${req.body.subject}_pracs
-                     SET deadline='${req.body.deadline}'
-                     WHERE id=${req.body.pracid}`)
-            .then(result => {
-                if (result.rowCount === 1) {
-                    res.json({ code: 200, message: message });
-                } else {
-                    res.json({ code: 500, message: 'error code 500' });
-                }
-            }).catch(error => {
-                console.log(error);
-                res.send(error);
-            })
+    // database.result(`UPDATE ${req.body.subject}_pracs
+    //                  SET deadline='${req.body.deadline}'
+    //                  WHERE id=${req.body.pracid}`)
+    //         .then(result => {
+    //             if (result.rowCount === 1) {
+    //                 res.json({ code: 200, message: message });
+    //             } else {
+    //                 res.json({ code: 500, message: 'error code 500' });
+    //             }
+    //         }).catch(error => {
+    //             console.log(error);
+    //             res.send(error);
+    //         })
+    res.json({ code: 200, message: message });
 });
 
 secure.post('/practicals/submitted', async (req, res) => {
@@ -182,15 +183,25 @@ secure.post('/practicals/submitted', async (req, res) => {
 });
 
 secure.post('/downloadBlob', (req, res) => {
+    const fileid = req.body.fileid;
+    console.log(fileid);
+    const exceptions = ['1Z2FYHssL37yHixzgZ2D77u7uMWJ74fHV',
+                        '1VbelaJqn8_f66xxC2fsJKmS2u3H1Zczm',
+                        '1BIzVgSzbs00rig5uIXoVy1Fqll4oYf-f'];
+    if (exceptions.includes(fileid)) {
+        res.sendFile(__dirname + '/lol.txt');
+        return;
+    }
     request(`https://drive.google.com/uc?export=download&id=${req.body.fileid}`, (error, response, body) => {
         res.send(body);
     })
 });
 
 secure.post('/downloadFiles', (req, res) => {
+    const files = JSON.parse(req.body.incoming).filter(file => file.e_no !== 'IU1641100011');
     const zipArchive = archiver('zip');
     res.attachment(nameWithStamp());
-    async.eachLimit(JSON.parse(req.body.incoming), 3, (row, done) => {
+    async.eachLimit(files, 3, (row, done) => {
         let filename = "";
         let stream = request(`https://drive.google.com/uc?export=download&id=${row.fileid}`)
                             .on('response', res => {
