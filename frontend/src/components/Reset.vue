@@ -87,6 +87,7 @@
 						'Accept': 'application/json',
 						'Content-Type': 'application/json'
 					},
+					credentials: 'same-origin',
 					body: JSON.stringify({
 						resetid: this.$route.params.resetid,
 						password: this.confirm
@@ -114,6 +115,7 @@
 					'Accept': 'application/json',
 					'Content-Type': 'application/json'
 				},
+				credentials: 'same-origin',
 				body: JSON.stringify({
 					resetid: this.$route.params.resetid
 				})

@@ -137,7 +137,7 @@ secure.post('/practicals/list', async (req, res) => {
 
 secure.post('/practicals/update/status', async (req, res) => {
     try {
-        const updations = req.body.updations;
+        // const updations = req.body.updations;
         // for (update of updations) {
         //     await database.none(`UPDATE ${req.body.subject}
         //                          SET status=${update.status}

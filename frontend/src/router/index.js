@@ -23,9 +23,10 @@ const router = new Router({
 			name: 'Login',
 			component: Login,
 			beforeEnter: (to, from, next) => {
-				fetch('/secure/check')
-					.then(res => res.json())
-					.then(res => {
+				fetch('/secure/check', {
+					credentials: 'same-origin',
+				}).then(res => res.json())
+				  .then(res => {
 						if (res.code === 401) {
 							next();
 						} else {
@@ -46,9 +47,10 @@ const router = new Router({
 			name: 'StudentDash',
 			component: StudentDash,
 			beforeEnter: (to, from, next) => {
-				fetch('/secure/check')
-					.then(res => res.json())
-					.then(res => {
+				fetch('/secure/check', {
+					credentials: 'same-origin',
+				}).then(res => res.json())
+				  .then(res => {
 						if (res.code === 401) {
 							next('/login');
 						} else {
@@ -68,9 +70,10 @@ const router = new Router({
 			name: 'FacultyDash',
 			component: FacultyDash,
 			beforeEnter: (to, from, next) => {
-				fetch('/secure/check')
-					.then(res => res.json())
-					.then(res => {
+				fetch('/secure/check', {
+					credentials: 'same-origin',
+				}).then(res => res.json())
+				  .then(res => {
 						if (res.code === 401) {
 							next('/login');
 						} else {
@@ -96,6 +99,7 @@ const router = new Router({
 						'Accept': 'application/json',
 						'Content-Type': 'application/json'
 					},
+					credentials: 'same-origin',
 					body: JSON.stringify({
 						resetid: to.params.resetid
 					})
@@ -114,9 +118,10 @@ const router = new Router({
 			name: 'Resetter',
 			component: Resetter,
 			beforeEnter: (to, from, next) => {
-				fetch('/secure/check')
-					.then(res => res.json())
-					.then(res => {
+				fetch('/secure/check', {
+					credentials: 'same-origin',
+				}).then(res => res.json())
+				  .then(res => {
 						if (res.code === 401) {
 							next('/FourHundredFour');
 						} else if (res.username === 'IU1641100011') {

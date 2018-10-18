@@ -11,7 +11,6 @@ const HtmlWebpackPlugin = require('html-webpack-plugin')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 const OptimizeCSSPlugin = require('optimize-css-assets-webpack-plugin')
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin')
-// const PurifyCssPlugin = require('purifycss-webpack')
 
 const env = require('../config/prod.env')
 
@@ -32,16 +31,19 @@ const webpackConfig = merge(baseWebpackConfig, {
   },
   plugins: [
 	new webpack.optimize.ModuleConcatenationPlugin(),
+
     // http://vuejs.github.io/vue-loader/en/workflow/production.html
     new webpack.DefinePlugin({
 		'process.env': {
 			'NODE_ENV': JSON.stringify(process.env.NODE_ENV)
 		}
-    }),
+	}),
+
     // extract css into its own file
     new MiniCssExtractPlugin({
       filename: utils.assetsPath('css/[name].[chunkhash].css'),
-    }),
+	}),
+
     // Compress extracted CSS. We are using this plugin so that possible
     // duplicated CSS from different components can be deduped.
     new OptimizeCSSPlugin({
@@ -49,16 +51,6 @@ const webpackConfig = merge(baseWebpackConfig, {
         ? { safe: true, map: { inline: false } }
         : { safe: true }
 	}),
-
-	// new PurifyCssPlugin({
-	// 	paths: glob.sync([
-	// 		'/frontend/index.html',
-	// 		'/frontend/src/components/*.vue',
-	// 		'/frontend/src/*.vue',
-	// 		'/frontend/src/*.js',
-	// 		'/frontend/src/router/*.js'
-	// 	  ])
-	// }),
 
     // generate dist index.html with correct asset hash for caching.
     // you can customize output by editing /index.html
@@ -76,10 +68,13 @@ const webpackConfig = merge(baseWebpackConfig, {
       },
       // necessary to consistently work with multiple chunks
       chunksSortMode: 'dependency'
-    }),
+	}),
+
     // keep module.id stable when vendor modules does not change
-    new webpack.NamedChunksPlugin(),
-    new webpack.HashedModuleIdsPlugin(),
+	new webpack.NamedChunksPlugin(),
+
+	new webpack.HashedModuleIdsPlugin(),
+
     // copy custom static assets
     new CopyWebpackPlugin([
       {
@@ -87,7 +82,7 @@ const webpackConfig = merge(baseWebpackConfig, {
         to: config.build.assetsSubDirectory,
         ignore: ['.*']
       }
-    ])
+	])
   ],
   optimization: {
     splitChunks: {

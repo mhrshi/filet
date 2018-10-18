@@ -203,6 +203,7 @@
 						'Accept': 'application/json',
 						'Content-Type': 'application/json'
 					},
+					credentials: 'same-origin',
 					body: JSON.stringify({
 						subject: this.select.toLowerCase(),
 						username: this.$store.state.username
@@ -251,6 +252,7 @@
 							'Accept': 'application/json',
 							'Content-Type': 'application/json'
 						},
+						credentials: 'same-origin',
 						body: JSON.stringify({
 							subject: this.select.toLowerCase(),
 							username: this.$store.state.username,
@@ -304,9 +306,10 @@
 			if (this.$route.params.id !== this.$store.state.username) {
 				this.$router.replace(`/student/${this.$store.state.username}`);
 			}
-			fetch('/secure/subjects')
-				.then(res => res.json())
-				.then(subjects => {
+			fetch('/secure/subjects', {
+				credentials: 'same-origin',
+			}).then(res => res.json())
+			  .then(subjects => {
 				    this.subjects = subjects;
 				});
 		}

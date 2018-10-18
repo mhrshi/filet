@@ -33,7 +33,7 @@
 		</v-toolbar>
 		<v-tabs-items v-model="tabModel" touchless>
 			<v-tab-item
-				id="tab-0"
+				value="tab-0"
 				key="0">
 				<main>
 					<v-container fill-height>
@@ -129,7 +129,7 @@
 				</main>
 			</v-tab-item>
 			<v-tab-item
-				id="tab-1"
+				value="tab-1"
 				key="1">
 				<main>
 					<v-container fill-height>
@@ -547,6 +547,7 @@
 							'Accept': 'application/json',
 							'Content-Type': 'application/json'
 						},
+						credentials: 'same-origin',
 						body: JSON.stringify({
 							subject: this.$store.state.username.slice(3).toLowerCase(),
 							deadline: deadline,
@@ -624,6 +625,7 @@
 							'Accept': 'application/json',
 							'Content-Type': 'application/json'
 						},
+						credentials: 'same-origin',
 						body: JSON.stringify({
 							fileid: item.fileid
 						})
@@ -685,6 +687,7 @@
 							'Accept': 'application/json',
 							'Content-Type': 'application/json'
 						},
+						credentials: 'same-origin',
 						body: JSON.stringify({
 							subject: this.$store.state.username.slice(3).toLowerCase(),
 							updations: [...this.uuids].map(i => {
@@ -786,6 +789,7 @@
 							'Accept': 'application/json',
 							'Content-Type': 'application/json'
 						},
+						credentials: 'same-origin',
 						body: JSON.stringify({
 							subject: this.$store.state.username.slice(3).toLowerCase()
 						})
@@ -841,6 +845,7 @@
 					'Accept': 'application/json',
 					'Content-Type': 'application/json'
 				},
+				credentials: 'same-origin',
 				body: JSON.stringify({
 					subject: this.$store.state.username.slice(3).toLowerCase()
 				})

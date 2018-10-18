@@ -79,6 +79,7 @@ export default {
 					'Accept': 'application/json',
 					'Content-Type': 'application/json'
 				},
+				credentials: 'same-origin',
 				body: JSON.stringify({
 					prefix: this.selected,
 					username: this.username,

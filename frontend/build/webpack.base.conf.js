@@ -4,6 +4,7 @@ const utils = require('./utils')
 const config = require('../config')
 const vueLoaderConfig = require('./vue-loader.conf')
 const { VueLoaderPlugin } = require('vue-loader')
+const VuetifyLoaderPlugin = require('vuetify-loader/lib/plugin')
 
 function resolve (dir) {
   return path.join(__dirname, '..', dir)
@@ -22,7 +23,8 @@ module.exports = {
       : config.dev.assetsPublicPath
   },
   plugins: [
-    new VueLoaderPlugin(),
+	new VueLoaderPlugin(),
+	new VuetifyLoaderPlugin()
   ],
   resolve: {
     extensions: ['.js', '.vue', '.json'],
