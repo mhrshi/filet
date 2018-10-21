@@ -9,10 +9,12 @@
 				</v-btn>
 				<v-list>
 					<v-list-tile
-						v-for="(item, index) in overflowItems"
-						:key="index"
+						to="/guide/">
+						<v-list-tile-title>Guide</v-list-tile-title>
+					</v-list-tile>
+					<v-list-tile
 						@click="onLogout">
-						<v-list-tile-title>{{ item.title }}</v-list-tile-title>
+						<v-list-tile-title>Log out</v-list-tile-title>
 					</v-list-tile>
 				</v-list>
 			</v-menu>
@@ -504,9 +506,6 @@
 				snackbar: false,
 				snackbarMessage: '',
 				snackbarColor: '',
-				overflowItems: [
-					{ title: 'Logout' }
-				],
 				rowsPerPageItems: [
 					5,
 					10,
