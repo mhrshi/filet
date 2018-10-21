@@ -3,6 +3,7 @@ import Router from 'vue-router';
 import Login from '@/components/Login';
 import StudentDash from '@/components/StudentDash';
 import FacultyDash from '@/components/FacultyDash';
+import Guide from '@/components/Guide';
 import Reset from '@/components/Reset';
 import Resetter from '@/components/Resetter';
 import FourHundredFour from '@/components/FourHundredFour';
@@ -87,6 +88,11 @@ const router = new Router({
 						next('/FourHundredFour');
 					});
 			}
+		},
+		{
+			path: '/guide',
+			name: 'Guide',
+			component: Guide
 		},
 		{
 			path: '/reset/:resetid',

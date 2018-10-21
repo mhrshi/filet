@@ -9,7 +9,7 @@
 						<br/><br/>
 						<h3 class="headline mb-0"><i>Ummm... Lost?</i></h3>
 						<br/>
-						<v-btn class="button" to="/login" color="primary">back to login</v-btn>
+						<v-btn class="button" to="/login" color="primary">back to home</v-btn>
 					</div>
 				</div>
 		</v-container>

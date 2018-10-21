@@ -41,7 +41,7 @@ renew.post('/password', async (req, res) => {
                     .then(out => {
                         database.none(`DELETE FROM reset WHERE id='${row.id}'`);
                         console.log(`reset done for ${row.e_no}`);
-                        res.send({ code: 200, message: 'Password saved successfully' });
+                        res.send({ code: 200, message: 'Password saved. Redirecting to login...' });
                     })
         });
     } catch(error) {

@@ -46,16 +46,18 @@ secure.post('/restricted/resetter', async (req, res) => {
     });
     try {
         const resetid = uuid();
+        const type = req.body.eno.startsWith('IU') ? 'student' : 'faculty';
         await database.none(`INSERT INTO reset VALUES ('${resetid}', '${req.body.eno}', '${Date.now()}')`);
-        const row = await database.one(`SELECT name, mail FROM student WHERE id='${req.body.eno}'`);
+        const row = await database.one(`SELECT name, mail FROM ${type} WHERE id='${req.body.eno}'`);
         const firstName = row.name.split(' ')[0];
         const name = firstName[0] + firstName.slice(1).toLowerCase();
+        const greet = type === 'student' ? `Hello ${name}` : 'Dear Madam/Sir';
         const mailConfig = {
             from: 'Filet App <maharshibhavsar.16.it@iite.indusuni.ac.in>',
             to: row.mail,
             subject: 'Password Reset',
             generateTextFromHTML: true,
-            html: `Hello ${name},<br/><br/>Please access the following link to reset your password:<br/>http://filet.herokuapp.com/reset/${resetid}<br/><br/>Note that above link will stay active only for an hour from now.<br/><br/>Regards,<br/>Filet`
+            html: `${greet},<br/><br/>Please access the following link to reset your password:<br/>http://filet.herokuapp.com/reset/${resetid}<br/><br/>Note that above link will stay active only for an hour from now.<br/><br/>Regards,<br/>Filet`
         };
         transporter.sendMail(mailConfig, (error, result) => {
             if (error) {
@@ -115,7 +117,7 @@ secure.post('/revise', async (req, res) => {
                 if (result.rowCount === 1) {
                     res.json({ code: 200, message: 'File ID saved' });
                 } else {
-                    res.json({ code: 500, message: 'error code 500' });
+                    res.json({ code: 500, message: 'Error code 500' });
                 }
             }).catch(error => {
                 console.log(error);
@@ -137,12 +139,12 @@ secure.post('/practicals/list', async (req, res) => {
 
 secure.post('/practicals/update/status', async (req, res) => {
     try {
-        // const updations = req.body.updations;
-        // for (update of updations) {
-        //     await database.none(`UPDATE ${req.body.subject}
-        //                          SET status=${update.status}
-        //                          WHERE e_no='${update.e_no}' AND id=${update.pracid}`);
-        // }
+        const updations = req.body.updations;
+        for (update of updations) {
+            await database.none(`UPDATE ${req.body.subject}
+                                 SET status=${update.status}
+                                 WHERE e_no='${update.e_no}' AND id=${update.pracid}`);
+        }
         res.json({ code: 200, message: 'Status(es) updated' });
     } catch (error) {
         console.log(error);
@@ -152,20 +154,19 @@ secure.post('/practicals/update/status', async (req, res) => {
 
 secure.post('/practicals/deadline', async (req, res) => {
     const message = req.body.deadline === '' ? 'Deadline reset' : 'Deadline updated';
-    // database.result(`UPDATE ${req.body.subject}_pracs
-    //                  SET deadline='${req.body.deadline}'
-    //                  WHERE id=${req.body.pracid}`)
-    //         .then(result => {
-    //             if (result.rowCount === 1) {
-    //                 res.json({ code: 200, message: message });
-    //             } else {
-    //                 res.json({ code: 500, message: 'error code 500' });
-    //             }
-    //         }).catch(error => {
-    //             console.log(error);
-    //             res.send(error);
-    //         })
-    res.json({ code: 200, message: message });
+    database.result(`UPDATE ${req.body.subject}_pracs
+                     SET deadline='${req.body.deadline}'
+                     WHERE id=${req.body.pracid}`)
+            .then(result => {
+                if (result.rowCount === 1) {
+                    res.json({ code: 200, message: message });
+                } else {
+                    res.json({ code: 500, message: 'Error code 500' });
+                }
+            }).catch(error => {
+                console.log(error);
+                res.send(error);
+            });
 });
 
 secure.post('/practicals/submitted', async (req, res) => {
@@ -183,22 +184,13 @@ secure.post('/practicals/submitted', async (req, res) => {
 });
 
 secure.post('/downloadBlob', (req, res) => {
-    const fileid = req.body.fileid;
-    console.log(fileid);
-    const exceptions = ['1Z2FYHssL37yHixzgZ2D77u7uMWJ74fHV',
-                        '1VbelaJqn8_f66xxC2fsJKmS2u3H1Zczm',
-                        '1BIzVgSzbs00rig5uIXoVy1Fqll4oYf-f'];
-    if (exceptions.includes(fileid)) {
-        res.sendFile(__dirname + '/lol.txt');
-        return;
-    }
     request(`https://drive.google.com/uc?export=download&id=${req.body.fileid}`, (error, response, body) => {
         res.send(body);
     })
 });
 
 secure.post('/downloadFiles', (req, res) => {
-    const files = JSON.parse(req.body.incoming).filter(file => file.e_no !== 'IU1641100011');
+    const files = JSON.parse(req.body.incoming);
     const zipArchive = archiver('zip');
     res.attachment(nameWithStamp());
     async.eachLimit(files, 3, (row, done) => {
