@@ -4,6 +4,7 @@ const async = require('async');
 const archiver = require('archiver');
 const nodemailer = require('nodemailer');
 const uuid = require('uuid/v4');
+const axios = require('axios');
 
 const secure = express.Router();
 
@@ -111,6 +112,13 @@ secure.post('/revise', async (req, res) => {
         console.log(error);
         res.status(204).send();
         return;
+    } 
+    if (req.body.fileid.length !== 0) {
+        const reply = await validateFile(req.body.fileid, req.body.pracid);
+        if (!reply.valid) {
+            res.json({ code: 500, message: reply.message });
+            return;
+        }
     }
     database.result(`UPDATE ${req.body.subject} SET fileid='${req.body.fileid}' WHERE e_no='${req.body.username}' AND id=${req.body.pracid}`)
             .then(result => {
@@ -124,6 +132,34 @@ secure.post('/revise', async (req, res) => {
                 res.send(error);
             });
 });
+
+async function validateFile(fileid, pracid) {
+    const reply = { valid: false, message: 'Error code 500' };
+    try {
+        const axres = await axios.head(`https://drive.google.com/uc?export=download&id=${fileid}`);
+        const filename = axres.headers['content-disposition']
+                              .split('filename=')[1]
+                              .split(';')[0]
+                              .replace(/"/g, '');
+        console.log(filename);
+        if (pracid > 5) {
+            if (/.(png|jpe?g)$/i.test(filename)) {
+                reply.valid = true;
+            } else {
+                reply.message = 'Only PNG/JP(E)G file allowed';
+            }
+        } else {
+            if (/.(c|cpp)$/i.test(filename)) {
+                reply.valid = true;
+            } else {
+                reply.message = 'Only C/C++ file allowed';
+            }
+        }
+    } catch(error) {
+        console.log(error);
+    }
+    return reply;
+}
 
 secure.post('/practicals/list', async (req, res) => {
     try {
