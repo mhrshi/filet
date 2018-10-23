@@ -113,7 +113,7 @@
 									:loading="listLoader"
 									:items="list"
 									item-key="uuid"
-									:rows-per-page-items="rowsPerPageItems"
+									hide-actions
 									must-sort
 									class="elevation-1">
 									<template slot="items" slot-scope="props">
@@ -346,7 +346,31 @@
 											</v-btn>
 											<v-toolbar-title class="headline font-weight-regular">{{ pracDialog.title }}</v-toolbar-title>
 										</v-toolbar>
-										<div class="pa-4 subheading code">{{ pracDialog.content }}</div>
+										<v-img
+											class="ma-4"
+											v-if="pracDialog.isImage && !pracDialog.loading"
+											:src="pracDialog.imageSrc"
+											contain>
+										</v-img>
+										<div class="pa-4 subheading code" v-else-if="!pracDialog.isImage && !pracDialog.loading">{{ pracDialog.code }}</div>
+										<v-container class="pa-4" fill-height v-else>
+										<v-layout
+											column
+											fill-height
+											align-center
+											justify-center
+											ma-0>
+											<v-flex
+												align-center
+												justify-center>
+												<v-progress-circular
+													color="primary"
+													size="40"
+													indeterminate>
+												</v-progress-circular>
+											</v-flex>
+										</v-layout>
+										</v-container>
 									</v-card>
 								</v-dialog>
 							</v-flex>
@@ -501,8 +525,14 @@
 				enrollSlider: this.maxEnroll,
 				minEnroll: 1,
 				maxEnroll: 25,
-				pracDialog: { open: false, title: '', content: 'Downloading code...' },
-				fileReader: new FileReader(),
+				pracDialog: {
+					open: false,
+					title: '',
+					code: '',
+					isImage: false,
+					imageSrc: '',
+					loading: false,
+				},
 				snackbar: false,
 				snackbarMessage: '',
 				snackbarColor: '',
@@ -612,10 +642,20 @@
 
 			openPracDialog(item) {
 				this.pracDialog.title = `${item.name} - ${item.e_no}`;
+				let prop = '';
+				if (item.id > 5) {
+					this.pracDialog.isImage = true;
+					prop = 'imageSrc';
+				} else {
+					this.pracDialog.isImage = false;
+					prop = 'code';
+				}
 				this.pracDialog.open = true;
-				const code = this.$store.state.practicals[this.batchSelect.name][item.uuid].code;
-				if (code) {
-					this.pracDialog.content = code;
+				this.pracDialog.loading = true;
+				const content = this.$store.state.practicals[this.batchSelect.name][item.uuid].content;
+				if (content) {
+					this.pracDialog.loading = false;
+					this.pracDialog[prop] = content;
 					return;
 				}
 				fetch('/secure/downloadBlob', {
@@ -628,24 +668,24 @@
 						body: JSON.stringify({
 							fileid: item.fileid
 						})
-				}).then(res => res.blob())
-				  .then(blob => {
-					  this.fileReader.onload = (e) => {
-						  this.pracDialog.content = e.target.result;
-						  this.$store.commit({
-							  type: 'updateCode',
-							  code: e.target.result,
-							  uuid: item.uuid,
-							  batch: this.batchSelect
-						  });
-					  }
-					  this.fileReader.readAsText(blob);
+				}).then(res => res.json())
+				  .then(res => {
+					  	this.pracDialog.loading = false;
+						this.pracDialog[prop] = res.content;
+						this.$store.commit({
+							type: 'updateContent',
+							content: res.content,
+							uuid: item.uuid,
+							batch: this.batchSelect
+						});
 				  });
 			},
 
 			closePracDialog() {
 				this.pracDialog.open = false;
-				this.pracDialog.content = 'Downloading code...';
+				this.pracDialog.loading = false;
+				this.pracDialog.content = '';
+				this.pracDialog.imageSrc = '';
 			},
 
 			changeStatus(item, newStatus) {
@@ -888,6 +928,10 @@
 
 	.eye-cursor {
 		cursor: url('./eye.svg'), pointer;
+	}
+
+	.full {
+		min-height: 100%;
 	}
 
 	/* .enroll-wrap {

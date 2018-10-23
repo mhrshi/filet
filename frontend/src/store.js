@@ -65,8 +65,8 @@ export const store = new Vuex.Store({
 			})
 		},
 
-		updateCode(state, { code, uuid, batch }) {
-			state.practicals[batch.name][uuid].code = code;
+		updateContent(state, { content, uuid, batch }) {
+			state.practicals[batch.name][uuid].content = content;
 		},
 
 		resetFilter(state) {

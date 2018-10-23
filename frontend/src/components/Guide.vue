@@ -45,7 +45,7 @@
 					<p class="mb-2">This will let you view any submission without actually downloading the file by yourself.</p>
 					<p class="mb-2"><span class="font-weight-medium mr-2">1.</span>Switch to the <span class="font-italic uline">Submissions</span> tab and select any batch</p>
 					<p class="mb-2"><span class="font-weight-medium mr-2">2.</span>Click the <span class="font-italic uline">Practical Name</span> of any submission (hint: your cursor will change to an eye)</p>
-					<p class="mb-2"><span class="font-weight-medium mr-2">3.</span>A dialog will open showing the file's content (mostly code for now)</p>
+					<p class="mb-2"><span class="font-weight-medium mr-2">3.</span>A dialog will open showing the file's content (image/text)</p>
 				</div>
 				<div id="branch-1-4" class="mt-4 subheading font-weight-medium">Download practical(s)</div>
 				<div class="body-1 pl-3 pt-3">

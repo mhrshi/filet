@@ -45,11 +45,19 @@ secure.post('/restricted/resetter', async (req, res) => {
             return;
         }
     });
+    let userId = req.body.eno;
+    if (req.body.eno.includes(',')) {
+        const [id, mail] = req.body.eno.split(', ');
+        userId = id;
+        await database.none(`UPDATE student
+                             SET mail='${mail}'
+                             WHERE id='${id}'`);
+    }
     try {
         const resetid = uuid();
-        const type = req.body.eno.startsWith('IU') ? 'student' : 'faculty';
-        await database.none(`INSERT INTO reset VALUES ('${resetid}', '${req.body.eno}', '${Date.now()}')`);
-        const row = await database.one(`SELECT name, mail FROM ${type} WHERE id='${req.body.eno}'`);
+        const type = userId.startsWith('IU') ? 'student' : 'faculty';
+        await database.none(`INSERT INTO reset VALUES ('${resetid}', '${userId}', '${Date.now()}')`);
+        const row = await database.one(`SELECT name, mail FROM ${type} WHERE id='${userId}'`);
         const firstName = row.name.split(' ')[0];
         const name = firstName[0] + firstName.slice(1).toLowerCase();
         const greet = type === 'student' ? `Hello ${name}` : 'Dear Madam/Sir';
@@ -220,9 +228,18 @@ secure.post('/practicals/submitted', async (req, res) => {
 });
 
 secure.post('/downloadBlob', (req, res) => {
-    request(`https://drive.google.com/uc?export=download&id=${req.body.fileid}`, (error, response, body) => {
-        res.send(body);
-    })
+    axios({
+        url: `https://drive.google.com/uc?export=download&id=${req.body.fileid}`,
+        responseType: 'arraybuffer'
+    }).then(axres => {
+            const contentType = axres.headers['content-type'];
+            if (contentType === 'text/plain') {
+                res.json({ content: Buffer.from(axres.data, 'utf-8').toString() });
+            } else {
+                const base64Image = Buffer.from(axres.data, 'binary').toString('base64');
+                res.json({ content: `data:${contentType};base64,${base64Image}` });
+            }
+        });
 });
 
 secure.post('/downloadFiles', (req, res) => {
