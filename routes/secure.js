@@ -233,7 +233,7 @@ secure.post('/downloadBlob', (req, res) => {
         responseType: 'arraybuffer'
     }).then(axres => {
             const contentType = axres.headers['content-type'];
-            if (contentType === 'text/plain') {
+            if (contentType.includes('text')) {
                 res.json({ content: Buffer.from(axres.data, 'utf-8').toString() });
             } else {
                 const base64Image = Buffer.from(axres.data, 'binary').toString('base64');
