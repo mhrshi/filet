@@ -232,12 +232,15 @@ secure.post('/downloadBlob', (req, res) => {
         url: `https://drive.google.com/uc?export=download&id=${req.body.fileid}`,
         responseType: 'arraybuffer'
     }).then(axres => {
-            const contentType = axres.headers['content-type'];
-            if (contentType.includes('text')) {
-                res.json({ content: Buffer.from(axres.data, 'utf-8').toString() });
-            } else {
+            const filename = axres.headers['content-disposition']
+                                  .split('filename=')[1]
+                                  .split(';')[0]
+                                  .replace(/"/g, '');
+            if (/.(png|jpe?g)$/i.test(filename)) {
                 const base64Image = Buffer.from(axres.data, 'binary').toString('base64');
-                res.json({ content: `data:${contentType};base64,${base64Image}` });
+                res.json({ content: `data:image/${filename.slice(filename.lastIndexOf('.') + 1)};base64,${base64Image}` });
+            } else {
+                res.json({ content: Buffer.from(axres.data, 'utf-8').toString() });
             }
         });
 });
