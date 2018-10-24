@@ -238,7 +238,8 @@ secure.post('/downloadBlob', (req, res) => {
                                   .replace(/"/g, '');
             if (/.(png|jpe?g)$/i.test(filename)) {
                 const base64Image = Buffer.from(axres.data, 'binary').toString('base64');
-                res.json({ content: `data:image/${filename.slice(filename.lastIndexOf('.') + 1)};base64,${base64Image}` });
+                const extension = filename.slice(filename.lastIndexOf('.') + 1).toLowerCase();
+                res.json({ content: `data:image/${extension};base64,${base64Image}` });
             } else {
                 res.json({ content: Buffer.from(axres.data, 'utf-8').toString() });
             }
