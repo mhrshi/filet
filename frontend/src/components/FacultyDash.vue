@@ -381,8 +381,9 @@
 									:items="batches"
 									item-text="name"
 									item-value="id"
+									@change="batchChange"
 									:hint="`${batchSelect.range || '' }`"
-									label="Batch"
+									label="Select a batch"
 									persistent-hint
 									return-object
 									solo>
