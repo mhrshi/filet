@@ -139,7 +139,6 @@
 							<v-flex xs12 lg8 xl8>
 								<v-flex class="batch-select" xs12 sm6 md6 lg6 xl4>
 									<v-select
-										ref="batchSelect"
 										v-model="batchSelect"
 										:disabled="reviewMode"
 										@change="batchChange"
@@ -300,15 +299,6 @@
 													class="enroll-wrap"
 													xs12 sm12 md12
 													v-else>
-													<!-- <v-text-field
-														v-model="enrollSlider"
-
-														class="mb-0 wrap-left"
-														type="number"
-														step="1"
-														hide-details
-														single-line>
-													</v-text-field> -->
 													<v-slider
 														class="mt-4 mr-3 ml-2"
 														v-model="enrollSlider"
@@ -378,6 +368,83 @@
 					</v-container>
 				</main>
 			</v-tab-item>
+			<v-tab-item
+				value="tab-2"
+				key="2"
+				lazy>
+				<main>
+					<v-container class="ma-0" fill-height fluid>
+						<v-layout row wrap justify-space-around>
+							<v-flex xs6 lg4 xl4>
+								<v-select
+									v-model="batchSelect"
+									:items="batches"
+									item-text="name"
+									item-value="id"
+									:hint="`${batchSelect.range || '' }`"
+									label="Batch"
+									persistent-hint
+									return-object
+									solo>
+								</v-select>
+								<v-expansion-panel>
+									<v-expansion-panel-content
+										v-for="(statItem, i) in getEnrollStats"
+										:key="i">
+										<v-layout slot="header" justify-space-between>
+											<span>{{ statItem.enroll }}</span>
+											<span class="pr-2">{{ statItem.done }}/{{ list.length }} submitted</span>
+										</v-layout>
+										<v-card>
+											<v-data-table
+												:headers="statHeaders"
+												:items="list"
+												hide-actions
+												must-sort>
+												<template slot="items" slot-scope="props">
+													<td class="text-xs-left">{{ props.item.name }}</td>
+													<td class="text-xs-center">
+														<v-icon>
+															{{ statItem.submitted[`${props.item.id}`] === undefined ? 'clear' : 'done' }}
+														</v-icon>
+													</td>
+													<td class="text-xs-center">
+														<v-icon
+															:color="statItem.submitted[`${props.item.id}`] !== undefined ? statuses[statItem.submitted[`${props.item.id}`]].color : 'rgba(33, 33, 33, 0.3)'">
+															{{ statItem.submitted[`${props.item.id}`] !== undefined
+																? statuses[statItem.submitted[`${props.item.id}`]].icon
+																: statuses[1].icon }}
+														</v-icon>
+													</td>
+												</template>
+											</v-data-table>
+										</v-card>
+									</v-expansion-panel-content>
+								</v-expansion-panel>
+							</v-flex>
+							<v-flex v-if="batchSelect.name" class="pl-2" xs6>
+								<v-container class="pt-0 pr-0" grid-list-md fluid>
+									<v-layout row wrap>
+										<v-flex
+											v-for="(prac, i) in list"
+											:key="i"
+											xs6>
+											<v-card>
+												<v-card-text>
+													<v-layout justify-space-between>
+													<span>{{ prac.name }}</span>
+													<span class="title font-weight-regular">{{ getPracStats(prac.id) }}/{{ batchSelect.strength }}</span>
+													</v-layout>
+												</v-card-text>
+											</v-card>
+										</v-flex>
+									</v-layout>
+								</v-container>
+							</v-flex>
+						</v-layout>
+					</v-container>
+				</main>
+			</v-tab-item>
 		</v-tabs-items>
 		<v-snackbar
 			v-model="snackbar"
@@ -407,7 +474,7 @@
 		data() {
 			return {
 				offsetTop: 0,
-				tabs: ["Practicals", "Submissions"],
+				tabs: ["Practicals", "Submissions", "Stats"],
 				tabModel: 'tab-0',
 				listHeaders: [
 					{
@@ -471,7 +538,7 @@
 						value: 'name'
 					},
 					{
-						text: 'Status',
+						text: 'Review',
 						align: 'center',
 						sortable: false,
 						value: 'status'
@@ -505,17 +572,20 @@
 					{
 						id: 1,
 						name: 'E1',
-						range: '1-25'
+						range: '1-25',
+						strength: 21
 					},
 					{
 						id: 2,
 						name: 'E2',
-						range: '26-47'
+						range: '26-47',
+						strength: 20
 					},
 					{
 						id: 3,
 						name: 'E3',
-						range: '48-67'
+						range: '48-67',
+						strength: 19
 					}
 				],
 				list: [],
@@ -544,7 +614,27 @@
 						"value": -1
 					}
 				],
-				uuids: undefined
+				uuids: undefined,
+				statHeaders: [
+					{
+						text: 'Practical',
+						value: 'Practical',
+						align: 'left',
+						sortable: false
+					},
+					{
+						text: 'Submitted',
+						value: 'Submitted',
+						align: 'center',
+						sortable: false
+					},
+					{
+						text: 'Review',
+						value: 'Review',
+						align: 'center',
+						sortable: false
+					}
+				]
 			}
 		},
 
@@ -800,6 +890,12 @@
 				this.batchChange(this.batchSelect);
 			},
 
+			getPracStats(pracid) {
+				return this.$store.state.practicals[this.batchSelect.name]
+										.filter(item => item.id === pracid)
+										.length;
+			},
+
 			showSnackbar(color, message) {
 				this.snackbarColor = color;
 				this.snackbarMessage = message;
@@ -818,59 +914,14 @@
 			}
 		},
 
-		watch: {
-			tabModel(val) {
-				if (val === 'tab-1' && !this.batchSelect.name) {
-					this.pracLoader = true;
-					fetch('/secure/practicals/submitted', {
-						method: 'POST',
-						headers: {
-							'Accept': 'application/json',
-							'Content-Type': 'application/json'
-						},
-						credentials: 'same-origin',
-						body: JSON.stringify({
-							subject: this.$store.state.username.slice(3).toLowerCase()
-						})
-					}).then(res => res.json())
-					  .then(practicals => {
-							this.$store.commit({
-								type: 'setPracticals',
-								batch: 'E1',
-								data: practicals.filter(prac => this.inRange(prac.e_no, 1, 25))
-												.map((prac, index) => ({
-													uuid: index,
-													...prac
-												}))
-							});
-							this.$store.commit({
-								type: 'setPracticals',
-								batch: 'E2',
-								data: practicals.filter(prac => this.inRange(prac.e_no, 26, 47))
-												.map((prac, index) => ({
-													uuid: index,
-													...prac
-												}))
-							});
-							this.$store.commit({
-								type: 'setPracticals',
-								batch: 'E3',
-								data: practicals.filter(prac => this.inRange(prac.e_no, 48, 67))
-												.map((prac, index) => ({
-													uuid: index,
-													...prac
-												}))
-							});
-							this.pracLoader = false;
-					  });
-				}
-			}
-		},
-
 		computed: {
     		indexedPracs() {
 				return this.$store.getters.filtered(this.batchSelect);
-    		}
+			},
+
+			getEnrollStats() {
+				return this.$store.getters[`${this.batchSelect.name}stats`];
+			}
   		},
 
 		mounted: async function() {
@@ -895,7 +946,53 @@
 					  deadline: this.deadlineString(item.deadline)
 				  }));
 				  this.listLoader = false;
+				  this.$store.commit({
+					  type: 'setPracList',
+					  pracList: list
+				  });
 			  });
+			this.pracLoader = true;
+			fetch('/secure/practicals/submitted', {
+				method: 'POST',
+				headers: {
+					'Accept': 'application/json',
+					'Content-Type': 'application/json'
+				},
+				credentials: 'same-origin',
+				body: JSON.stringify({
+					subject: this.$store.state.username.slice(3).toLowerCase()
+				})
+			}).then(res => res.json())
+				.then(practicals => {
+					this.$store.commit({
+						type: 'setPracticals',
+						batch: 'E1',
+						data: practicals.filter(prac => this.inRange(prac.e_no, 1, 25))
+										.map((prac, index) => ({
+											uuid: index,
+											...prac
+										}))
+					});
+					this.$store.commit({
+						type: 'setPracticals',
+						batch: 'E2',
+						data: practicals.filter(prac => this.inRange(prac.e_no, 26, 47))
+										.map((prac, index) => ({
+											uuid: index,
+											...prac
+										}))
+					});
+					this.$store.commit({
+						type: 'setPracticals',
+						batch: 'E3',
+						data: practicals.filter(prac => this.inRange(prac.e_no, 48, 67))
+										.map((prac, index) => ({
+											uuid: index,
+											...prac
+										}))
+					});
+					this.pracLoader = false;
+				});
 		}
 	}
 </script>
@@ -933,17 +1030,4 @@
 	.full {
 		min-height: 100%;
 	}
-
-	/* .enroll-wrap {
-		display: flex;
-	}
-
-	.wrap-left {
-		flex-basis: 7%;
-		margin-top: -4px;
-	}
-
-	.wrap-right {
-		flex-basis: 93%;
-	} */
 </style>

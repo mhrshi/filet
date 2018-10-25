@@ -149,7 +149,6 @@ async function validateFile(fileid, pracid) {
                               .split('filename=')[1]
                               .split(';')[0]
                               .replace(/"/g, '');
-        console.log(filename);
         if (pracid > 5) {
             if (/.(png|jpe?g)$/i.test(filename)) {
                 reply.valid = true;
@@ -165,6 +164,7 @@ async function validateFile(fileid, pracid) {
         }
     } catch(error) {
         console.log(error);
+        reply.message = 'File not found';
     }
     return reply;
 }

@@ -10,8 +10,8 @@ entrance.post('/', async (req, res) => {
         await res.cookie('FiletLog', jwt.sign({
             prefix: req.body.prefix,
             username: username
-        }, process.env.LOL, { expiresIn: "1800000" }), {
-            maxAge: 1800000,
+        }, process.env.LOL, { expiresIn: "9000000" }), {
+            maxAge: 9000000,
         });
     }
 	res.json(reply);

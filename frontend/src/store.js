@@ -9,6 +9,7 @@ export const store = new Vuex.Store({
 	state: {
 		prefix: '',
 		username: '',
+		pracList: [],
 		practicals: {
 			E1: [],
 			E2: [],
@@ -36,6 +37,48 @@ export const store = new Vuex.Store({
 				return state.practicals[batch.name]
 							.filter(prac => prac.e_no.endsWith(state.filter.enroll));
 			}
+		},
+		E1stats: state => {
+			const enrolls = [...new Set(state.practicals['E1'].map(item => item.e_no))];
+			return enrolls.map(enroll => {
+				let done = 0;
+				const submitted = {};
+				for (const item of state.practicals['E1']) {
+					if (item.e_no === enroll) {
+						done++;
+						submitted[`${item.id}`] = item.status;
+					}
+				}
+				return { enroll, done, submitted };
+			});
+		},
+		E2stats: state => {
+			const enrolls = [...new Set(state.practicals['E2'].map(item => item.e_no))];
+			return enrolls.map(enroll => {
+				let done = 0;
+				const submitted = {};
+				for (const item of state.practicals['E2']) {
+					if (item.e_no === enroll) {
+						done++;
+						submitted[`${item.id}`] = item.status;
+					}
+				}
+				return { enroll, done, submitted };
+			});
+		},
+		E3stats: state => {
+			const enrolls = [...new Set(state.practicals['E3'].map(item => item.e_no))];
+			return enrolls.map(enroll => {
+				let done = 0;
+				const submitted = {};
+				for (const item of state.practicals['E3']) {
+					if (item.e_no === enroll) {
+						done++;
+						submitted[`${item.id}`] = item.status;
+					}
+				}
+				return { enroll, done, submitted };
+			});
 		}
 	},
 
@@ -43,6 +86,10 @@ export const store = new Vuex.Store({
 		update(state, payload) {
 			state.prefix = payload.prefix;
 			state.username = payload.username;
+		},
+
+		setPracList(state, payload) {
+			Object.assign(state.pracList, payload.pracList);
 		},
 
 		setPracticals(state, payload) {

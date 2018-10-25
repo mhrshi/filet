@@ -13,7 +13,7 @@
 								autofocus
 								v-model="password"
 								type="password"
-								label="Password"
+								label="New Password"
 								name="password"
 								hint="Minimum 8 characters"
 								counter
@@ -25,7 +25,7 @@
 								class="center"
 								v-model="confirm"
 								type="password"
-								label="Confirm Password"
+								label="Confirm New Password"
 								name="confirm"
 								counter
 								:rules="[rules.required, rules.min, rules.match]"
@@ -103,7 +103,7 @@
 					  this.snackbar = true;
 					  setTimeout(() => {
 						  this.$router.push('/login');
-					  }, 6000);
+					  }, 4000);
 				  })
 			}
 		},

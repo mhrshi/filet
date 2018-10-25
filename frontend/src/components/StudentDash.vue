@@ -154,7 +154,7 @@
 						value: 'fileid'
 					},
 					{
-						text: 'Status',
+						text: 'Review',
 						align: 'center',
 						sortable: false,
 						value: 'status'
