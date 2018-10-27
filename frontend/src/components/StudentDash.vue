@@ -185,7 +185,8 @@
 				],
 				pracLoader: false,
 				practicals: [],
-				IT0501: []
+				IT0501: [],
+				IT0502: []
 			}
 		},
 
@@ -256,6 +257,7 @@
 							subject: this.select.toLowerCase(),
 							username: this.$store.state.username,
 							fileid: this.editedItem.fileid,
+							filetype: this.editedItem.filetype,
 							pracid: this.editedItem.id
 						})
 					});
@@ -295,8 +297,8 @@
 			},
 
 			onLogout() {
-				document.cookie = 'FiletLog=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
 				this.$router.push('/login');
+				document.cookie = 'FiletLog=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
 				this.$store.commit('resetState');
 			}
 		},

@@ -87,7 +87,7 @@ secure.post('/restricted/resetter', async (req, res) => {
 
 secure.get('/subjects', async (req, res) => {
     try {
-        const subjects = await database.many(`SELECT id, name FROM subject WHERE id='IT0501'`);
+        const subjects = await database.many(`SELECT id, name FROM subject`);
         res.json(subjects);
     } catch(error) {
         res.send(error);
@@ -96,7 +96,7 @@ secure.get('/subjects', async (req, res) => {
 
 secure.post('/practicals', async (req, res) => {
     try {
-        const practicals = await database.many(`SELECT ${req.body.subject}.id, ${req.body.subject}.fileid, ${req.body.subject}.status, ${req.body.subject}_pracs.name
+        const practicals = await database.many(`SELECT ${req.body.subject}.id, ${req.body.subject}.fileid, ${req.body.subject}.status, ${req.body.subject}_pracs.name, ${req.body.subject}_pracs.filetype
                                                 FROM ${req.body.subject}
                                                 INNER JOIN ${req.body.subject}_pracs ON ${req.body.subject}.id = ${req.body.subject}_pracs.id
                                                 WHERE e_no='${req.body.username}'
@@ -122,7 +122,7 @@ secure.post('/revise', async (req, res) => {
         return;
     } 
     if (req.body.fileid.length !== 0) {
-        const reply = await validateFile(req.body.fileid, req.body.pracid);
+        const reply = await validateFile(req.body.fileid, req.body.filetype);
         if (!reply.valid) {
             res.json({ code: 500, message: reply.message });
             return;
@@ -141,15 +141,15 @@ secure.post('/revise', async (req, res) => {
             });
 });
 
-async function validateFile(fileid, pracid) {
+async function validateFile(fileId, fileType) {
     const reply = { valid: false, message: 'Error code 500' };
     try {
-        const axres = await axios.head(`https://drive.google.com/uc?export=download&id=${fileid}`);
+        const axres = await axios.head(`https://drive.google.com/uc?export=download&id=${fileId}`);
         const filename = axres.headers['content-disposition']
                               .split('filename=')[1]
                               .split(';')[0]
                               .replace(/"/g, '');
-        if (pracid > 5) {
+        if (fileType === 'img') {
             if (/.(png|jpe?g)$/i.test(filename)) {
                 reply.valid = true;
             } else {
@@ -275,6 +275,22 @@ secure.post('/downloadFiles', (req, res) => {
         }
     });
 });
+
+const numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13];
+
+async function call() {
+    const enrolls = await database.many(`SELECT DISTINCT e_no FROM it0501
+                                         ORDER BY e_no ASC`);
+    for (enroll of enrolls) {
+        for (num of numbers) {
+            await database.none(`INSERT INTO it0502 VALUES
+                (${num}, '${enroll.e_no}')`);
+        }
+    }
+    console.log(`done`);
+}
+
+// call();
 
 function nameWithStamp() {
     const dateObject = (new Date()).toLocaleString();

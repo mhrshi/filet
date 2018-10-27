@@ -734,7 +734,7 @@
 			openPracDialog(item) {
 				this.pracDialog.title = `${item.name} - ${item.e_no}`;
 				let prop = '';
-				if (item.id > 5) {
+				if (this.list[item.id - 1].filetype === 'img') {
 					this.pracDialog.isImage = true;
 					prop = 'imageSrc';
 				} else {
@@ -904,8 +904,8 @@
 			},
 
 			onLogout() {
-				document.cookie = 'FiletLog=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
 				this.$router.push('/login');
+				document.cookie = 'FiletLog=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
 				this.$store.commit('resetState');
 			},
 
