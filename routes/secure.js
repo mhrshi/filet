@@ -276,22 +276,6 @@ secure.post('/downloadFiles', (req, res) => {
     });
 });
 
-const numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13];
-
-async function call() {
-    const enrolls = await database.many(`SELECT DISTINCT e_no FROM it0501
-                                         ORDER BY e_no ASC`);
-    for (enroll of enrolls) {
-        for (num of numbers) {
-            await database.none(`INSERT INTO it0502 VALUES
-                (${num}, '${enroll.e_no}')`);
-        }
-    }
-    console.log(`done`);
-}
-
-// call();
-
 function nameWithStamp() {
     const dateObject = (new Date()).toLocaleString();
     const [date, time] = dateObject.split(', ');
