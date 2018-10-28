@@ -5,7 +5,8 @@ module.exports = {
     	}]
     ],
   	plugins: [
-	  	"transform-vue-jsx",
+		"transform-vue-jsx",
+		"syntax-jsx",
 		"@babel/plugin-transform-runtime"
 	]
 }

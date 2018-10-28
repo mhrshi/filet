@@ -73,14 +73,14 @@
 					<p class="mb-2"><span class="font-weight-medium mr-2">2.</span>Right click file <span class="subheading px-1">&#x279D;</span> Get shareable link</p>
 					<v-img
 						class="my-3"
-						src="/static/sharing_settings.webp"
+						src="/static/sharing_settings.png"
 						max-width="500">
 					</v-img>
 					<p class="mb-2"><span class="font-weight-medium mr-2">3.</span>Sharing settings <span class="subheading px-1">&#x279D;</span> Advanced</p>
 					<p class="mb-2"><span class="font-weight-medium mr-2">4.</span>Under <span class="font-italic uline">Who has access</span> click <span class="font-italic uline primary--text">Change...</span></p>
 					<v-img
 						class="my-3"
-						src="/static/link_access.webp"
+						src="/static/link_access.png"
 						max-width="500">
 					</v-img>
 					<p class="mb-2"><span class="font-weight-medium mr-2">5.</span>Select <span class="font-italic uline">On - Anyone with the link</span> and save the choice</p>

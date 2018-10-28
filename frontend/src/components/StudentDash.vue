@@ -22,7 +22,7 @@
 	<main>
 		<v-container fill-height>
 			<v-layout align-center justify-center>
-				<v-flex xs12 lg8 xl8>
+				<v-flex xs12 lg10 xl8>
 					<v-flex class="subject-select" xs12 sm6 md6 lg6 xl4>
 						<v-select
 							v-model="select"
