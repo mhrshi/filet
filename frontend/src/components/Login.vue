@@ -166,7 +166,7 @@ export default {
 				{
 					src: './static/papers.svg',
 					bgColor: 'green lighten-4',
-					desc: 'And everybody contributes towards saving paper :)'
+					desc: '🌱 And everybody contributes towards saving paper 🌳'
 				}
 			]
 		}
