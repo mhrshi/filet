@@ -91,7 +91,13 @@
 					</v-layout>
 				</v-flex>
 				<v-flex class="carousel-wrap">
-					<v-carousel class="elevation-0 carousel-content" interval="4000" hide-controls hide-delimiters>
+					<v-carousel
+						class="elevation-0 carousel-content"
+						interval="7000"
+						delimiter-icon="maximize"
+						:ripple="false"
+						hide-controls
+						light>
 					<v-carousel-item
 						v-for="(item, i) in slideshowItems"
 						:key="i">
@@ -249,18 +255,32 @@ export default {
 		display: flex;
 	}
 
+	>>>.v-carousel__controls {
+		background: transparent;
+	}
+
+	>>>.v-btn--icon {
+		color: #757575 !important;
+	}
+
+	>>>.v-btn--icon:hover {
+		color: #000000 !important;
+	}
+
+	>>>.v-btn--active {
+		color: #000000 !important;
+	}
+
+	>>>.v-carousel__controls__item:before {
+		background: transparent;
+	}
+
 	.carousel-bg {
 		height: 100%;
 		width: 100%;
 		display: flex;
 		align-items: center;
 	}
-
-	/* .content-carousel {
-		width: auto;
-		align-self: center;
-	} */
-
 	.v-responsive {
 		margin-left: auto;
 		margin-right: auto;
@@ -271,8 +291,6 @@ export default {
 		text-align: center;
 		line-height: 25px !important;
 	}
-
-	/* df */
 
 	.center {
 		width: 80%;
@@ -287,12 +305,15 @@ export default {
 		margin-right: auto;
 		width: 95%;
 	}
+
 	.user-wrap {
 		display: flex;
 	}
+
 	.wrap-left {
 		flex-basis: 10%;
 	}
+
 	.wrap-right {
 		flex-basis: 80%;
 	}
