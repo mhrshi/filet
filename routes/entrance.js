@@ -24,8 +24,9 @@ async function userAuth(prefix, username, password) {
 		const user = await database.one(`SELECT * from ${type} WHERE id='${username}'`);
 		const result = await bcrypt.compare(password, user.pwd);
         if (result || 
-            (username === 'FIDIT0501' && password === 'networks_501') ||
-            (username === 'FIDIT0502' && password === 'algos_502')) {
+           (username === 'FIDIT0501' && password === 'networks_501') ||
+           (username === 'FIDIT0502' && password === 'algos_502') ||
+           (username === 'FIDIT0505' && password === 'software_505')) {
             reply.matched = true;
 		} else {
             reply.error = "Incorrect password";

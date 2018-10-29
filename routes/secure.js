@@ -155,6 +155,12 @@ async function validateFile(fileId, fileType) {
             } else {
                 reply.message = 'Only PNG/JP(E)G file allowed';
             }
+        } else if (fileType === 'pdf') {
+            if (/.(pdf)$/i.test(filename)) {
+                reply.valid = true;
+            } else {
+                reply.message = 'Only PDF file allowed';
+            }
         } else {
             if (/.(c|cpp)$/i.test(filename)) {
                 reply.valid = true;
@@ -164,7 +170,7 @@ async function validateFile(fileId, fileType) {
         }
     } catch(error) {
         console.log(error);
-        reply.message = 'File not found';
+        reply.message = 'File not accessible';
     }
     return reply;
 }
@@ -240,6 +246,10 @@ secure.post('/downloadBlob', (req, res) => {
                 const base64Image = Buffer.from(axres.data, 'binary').toString('base64');
                 const extension = filename.slice(filename.lastIndexOf('.') + 1).toLowerCase();
                 res.json({ content: `data:image/${extension};base64,${base64Image}` });
+            } else if (/.(pdf)$/i.test(filename)) {
+                res.setHeader('content-type', 'application/pdf');
+                res.setHeader('content-disposition', 'inline; filename="SRS.pdf"');
+                res.send(axres.data);
             } else {
                 res.json({ content: Buffer.from(axres.data, 'utf-8').toString() });
             }

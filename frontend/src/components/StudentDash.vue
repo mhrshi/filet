@@ -186,7 +186,8 @@
 				pracLoader: false,
 				practicals: [],
 				IT0501: [],
-				IT0502: []
+				IT0502: [],
+				IT0505: []
 			}
 		},
 

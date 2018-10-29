@@ -173,7 +173,6 @@ export default {
 	},
 	methods: {
 		onSubmit: function() {
-			console.log(`called`);
 			if (!this.$refs.form.validate()) {
 				return;
 			}

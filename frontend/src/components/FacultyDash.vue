@@ -177,7 +177,7 @@
 										</td>
 										<td class="text-xs-center">{{ props.item.e_no }}</td>
 										<td class="text-xs-right">{{ props.item.id }}</td>
-										<td class="text-xs-center eye-cursor" @click="openPracDialog(props.item)">{{ props.item.name }}</td>
+										<td class="text-xs-center eye-cursor" @click="openPractical(props.item)">{{ props.item.name }}</td>
 										<td class="text-xs-center">
 											<template v-if="reviewMode">
 													<v-tooltip
@@ -731,10 +731,34 @@
 				this.editedIndex = -1;
 			},
 
+			openPractical(item) {
+				if (this.list[item.id - 1].filetype === 'pdf') {
+					const newTab = window.open();
+					fetch('/secure/downloadBlob', {
+					method: 'POST',
+						headers: {
+							'Accept': 'application/json',
+							'Content-Type': 'application/json'
+						},
+						credentials: 'same-origin',
+						body: JSON.stringify({
+							fileid: item.fileid
+						})
+					}).then(res => res.blob())
+				  	  .then(blob => {
+							const url = URL.createObjectURL(blob);
+							newTab.location = url;
+				  })
+				} else {
+					this.openPracDialog(item);
+				}
+			},
+
 			openPracDialog(item) {
 				this.pracDialog.title = `${item.name} - ${item.e_no}`;
 				let prop = '';
-				if (this.list[item.id - 1].filetype === 'img') {
+				const filetype = this.list[item.id - 1].filetype;
+				if (filetype === 'img') {
 					this.pracDialog.isImage = true;
 					prop = 'imageSrc';
 				} else {
