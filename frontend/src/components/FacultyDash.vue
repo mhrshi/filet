@@ -68,7 +68,8 @@
 														first-day-of-week="1"
 														v-model="inputtedDate"
 														@input="$refs.dateMenu.save(inputtedDate)"
-														locale="en-in">
+														locale="en-in"
+														landscape>
 													</v-date-picker>
 												</v-menu>
 													</v-flex>
@@ -93,7 +94,7 @@
 														v-model="inputtedTime"
 														format="24hr"
 														@change="$refs.timeMenu.save(inputtedTime)"
-														full-width>
+														landscape>
 													</v-time-picker>
 												</v-menu>
 													</v-flex>
@@ -754,26 +755,8 @@
 				}
 			},
 
-			openPracDialog(item) {
-				this.pracDialog.title = `${item.name} - ${item.e_no}`;
-				let prop = '';
-				const filetype = this.list[item.id - 1].filetype;
-				if (filetype === 'img') {
-					this.pracDialog.isImage = true;
-					prop = 'imageSrc';
-				} else {
-					this.pracDialog.isImage = false;
-					prop = 'code';
-				}
-				this.pracDialog.open = true;
-				this.pracDialog.loading = true;
-				const content = this.$store.state.practicals[this.batchSelect.name][item.uuid].content;
-				if (content) {
-					this.pracDialog.loading = false;
-					this.pracDialog[prop] = content;
-					return;
-				}
-				fetch('/secure/downloadBlob', {
+			async fetchBlob(item) {
+				let res = await fetch('/secure/downloadBlob', {
 					method: 'POST',
 						headers: {
 							'Accept': 'application/json',
@@ -783,23 +766,45 @@
 						body: JSON.stringify({
 							fileid: item.fileid
 						})
-				}).then(res => res.json())
-				  .then(res => {
-					  	this.pracDialog.loading = false;
-						this.pracDialog[prop] = res.content;
-						this.$store.commit({
-							type: 'updateContent',
-							content: res.content,
-							uuid: item.uuid,
-							batch: this.batchSelect
-						});
-				  });
+				});
+				const filetype = res.headers.get('file-type');
+				this.list[item.id - 1].filetype = filetype;
+				res = await res.json();
+				this.$store.commit({
+					type: 'updateContent',
+					content: res.content,
+					uuid: item.uuid,
+					batch: this.batchSelect
+				});
+				return res.content;
+			},
+
+			async openPracDialog(item) {
+				this.pracDialog.title = `${item.name} - ${item.e_no}`;
+				let prop = '';
+				let filetype = this.list[item.id - 1].filetype;
+				let content = this.$store.state.practicals[this.batchSelect.name][item.uuid].content;
+				this.pracDialog.open = true;
+				this.pracDialog.loading = true;
+				if (filetype === 'any' || !content) {
+					content = await this.fetchBlob(item);
+				}
+				filetype = this.list[item.id - 1].filetype;
+				if (filetype === 'img') {
+					this.pracDialog.isImage = true;
+					prop = 'imageSrc';
+				} else {
+					this.pracDialog.isImage = false;
+					prop = 'code';
+				}
+				this.pracDialog[prop] = content;
+				this.pracDialog.loading = false;
 			},
 
 			closePracDialog() {
 				this.pracDialog.open = false;
 				this.pracDialog.loading = false;
-				this.pracDialog.content = '';
+				this.pracDialog.code = '';
 				this.pracDialog.imageSrc = '';
 			},
 
@@ -1028,7 +1033,7 @@
 	}
 
 	.dummy {
-		display: none;
+		display: none !important;
 	}
 
 	.clickable {

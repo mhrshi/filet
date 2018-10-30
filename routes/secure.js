@@ -8,6 +8,25 @@ const axios = require('axios');
 
 const secure = express.Router();
 
+const exts = {
+    txt: {
+        match: '.(c|cpp|txt)$',
+        allowed: 'C/C++'
+    },
+    img: {
+        match: '.(png|jpe?g)$',
+        allowed: 'PNG/JPG'
+    },
+    pdf: {
+        match: '.pdf$',
+        allowed: 'PDF'
+    },
+    any: {
+        match: '.(c|cpp|txt|png|jpe?g)$',
+        allowed: 'text/image'
+    }
+};
+
 const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
@@ -149,24 +168,11 @@ async function validateFile(fileId, fileType) {
                               .split('filename=')[1]
                               .split(';')[0]
                               .replace(/"/g, '');
-        if (fileType === 'img') {
-            if (/.(png|jpe?g)$/i.test(filename)) {
-                reply.valid = true;
-            } else {
-                reply.message = 'Only PNG/JP(E)G file allowed';
-            }
-        } else if (fileType === 'pdf') {
-            if (/.(pdf)$/i.test(filename)) {
-                reply.valid = true;
-            } else {
-                reply.message = 'Only PDF file allowed';
-            }
+        const regex = new RegExp(exts[fileType]['match'], 'i');
+        if (regex.test(filename)) {
+            reply.valid = true;
         } else {
-            if (/.(c|cpp)$/i.test(filename)) {
-                reply.valid = true;
-            } else {
-                reply.message = 'Only C/C++ file allowed';
-            }
+            reply.message = `Only ${exts[fileType]['allowed']} file allowed`;
         }
     } catch(error) {
         console.log(error);
@@ -243,14 +249,16 @@ secure.post('/downloadBlob', (req, res) => {
                                   .split(';')[0]
                                   .replace(/"/g, '');
             if (/.(png|jpe?g)$/i.test(filename)) {
+                res.setHeader('file-type', 'img');
                 const base64Image = Buffer.from(axres.data, 'binary').toString('base64');
                 const extension = filename.slice(filename.lastIndexOf('.') + 1).toLowerCase();
                 res.json({ content: `data:image/${extension};base64,${base64Image}` });
-            } else if (/.(pdf)$/i.test(filename)) {
+            } else if (/.pdf$/i.test(filename)) {
                 res.setHeader('content-type', 'application/pdf');
                 res.setHeader('content-disposition', 'inline; filename="SRS.pdf"');
                 res.send(axres.data);
             } else {
+                res.setHeader('file-type', 'txt');
                 res.json({ content: Buffer.from(axres.data, 'utf-8').toString() });
             }
         });
