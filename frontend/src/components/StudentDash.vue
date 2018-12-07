@@ -70,7 +70,7 @@
 						<template slot="items"
 									slot-scope="props">
 							<td class="text-xs-right">{{ props.item.id }}</td>
-							<td class="text-xs-center">{{ props.item.name }}</td>
+							<td class="text-xs-center eye-cursor" @click="openPractical(props.item)">{{ props.item.name }}</td>
 							<td class="text-xs-center">{{ props.item.fileid || '&horbar;' }}</td>
 							<td class="text-xs-center">
 								<v-tooltip
@@ -91,6 +91,45 @@
 							</td>
 						</template>
 					</v-data-table>
+					<v-dialog
+						v-model="pracDialog.open"
+						transition="dialog-bottom-transition"
+						fullscreen
+						hide-overlay>
+						<v-card>
+							<v-toolbar prominent dark color="primary">
+								<v-btn icon dark @click.native="closePracDialog">
+									<v-icon>close</v-icon>
+								</v-btn>
+								<v-toolbar-title class="headline font-weight-regular">{{ pracDialog.title }}</v-toolbar-title>
+							</v-toolbar>
+							<v-img
+								class="ma-4"
+								v-if="pracDialog.isImage && !pracDialog.loading"
+								:src="pracDialog.imageSrc"
+								contain>
+							</v-img>
+							<div class="pa-4 subheading code" v-else-if="!pracDialog.isImage && !pracDialog.loading">{{ pracDialog.code }}</div>
+							<v-container class="pa-4" fill-height v-else>
+							<v-layout
+								column
+								fill-height
+								align-center
+								justify-center
+								ma-0>
+								<v-flex
+									align-center
+									justify-center>
+									<v-progress-circular
+										color="primary"
+										size="40"
+										indeterminate>
+									</v-progress-circular>
+								</v-flex>
+							</v-layout>
+							</v-container>
+						</v-card>
+					</v-dialog>
 					<v-snackbar
 						v-model="snackbar"
 						bottom
@@ -185,6 +224,14 @@
 				],
 				pracLoader: false,
 				practicals: [],
+				pracDialog: {
+					open: false,
+					title: '',
+					code: '',
+					isImage: false,
+					imageSrc: '',
+					loading: false,
+				},
 				IT0501: [],
 				IT0502: [],
 				IT0505: []
@@ -291,6 +338,78 @@
 				this.editedIndex = -1;
 			},
 
+			openPractical(item) {
+				if (this.practicals[item.id - 1].filetype === 'pdf') {
+					const newTab = window.open();
+					fetch('/secure/downloadBlob', {
+					method: 'POST',
+						headers: {
+							'Accept': 'application/json',
+							'Content-Type': 'application/json'
+						},
+						credentials: 'same-origin',
+						body: JSON.stringify({
+							fileid: item.fileid
+						})
+					}).then(res => res.blob())
+				  	  .then(blob => {
+							const url = URL.createObjectURL(blob);
+							newTab.location = url;
+				  })
+				} else {
+					this.openPracDialog(item);
+				}
+			},
+
+			async fetchBlob(item) {
+				let res = await fetch('/secure/downloadBlob', {
+					method: 'POST',
+						headers: {
+							'Accept': 'application/json',
+							'Content-Type': 'application/json'
+						},
+						credentials: 'same-origin',
+						body: JSON.stringify({
+							fileid: item.fileid
+						})
+				});
+				const filetype = res.headers.get('file-type');
+				this.practicals[item.id - 1].filetype = filetype;
+				res = await res.json();
+				this[this.select][item.id - 1].content = res.content;
+				this.practicals[item.id - 1].content = res.content;
+				return res.content;
+			},
+
+			async openPracDialog(item) {
+				this.pracDialog.title = item.name;
+				let prop = '';
+				let filetype = this.practicals[item.id - 1].filetype;
+				let content = this.practicals[item.id - 1].content;
+				this.pracDialog.open = true;
+				this.pracDialog.loading = true;
+				if (filetype === 'any' || !content) {
+					content = await this.fetchBlob(item);
+				}
+				filetype = this.practicals[item.id - 1].filetype;
+				if (filetype === 'img') {
+					this.pracDialog.isImage = true;
+					prop = 'imageSrc';
+				} else {
+					this.pracDialog.isImage = false;
+					prop = 'code';
+				}
+				this.pracDialog[prop] = content;
+				this.pracDialog.loading = false;
+			},
+
+			closePracDialog() {
+				this.pracDialog.open = false;
+				this.pracDialog.loading = false;
+				this.pracDialog.code = '';
+				this.pracDialog.imageSrc = '';
+			},
+
 			showSnackbar(color, message) {
 				this.snackbarColor = color;
 				this.snackbarMessage = message;
@@ -332,7 +451,16 @@
 		white-space: nowrap;
 	}
 
+	.code {
+		font-family: 'Roboto Mono';
+		white-space: pre-wrap;
+	}
+
 	.default-cursor {
 		cursor: default;
+	}
+
+	.eye-cursor {
+		cursor: url('./eye.svg'), pointer;
 	}
 </style>
