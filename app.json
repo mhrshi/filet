@@ -1,8 +1,7 @@
 {
-  "name": "griffyle",
-  "description": "A web app to handle files",
-  "repository": "https://git.heroku.com/griffyle.git",
+  "name": "filet",
+  "description": "A full-stack web app to digitalize lab practical submissions, both for students & teachers.",
+  "repository": "",
   "logo": "",
-  "keywords": ["node", "express", "griffyle"],
-  "image": "heroku/nodejs"
+  "keywords": ["node", "express", "filet"]
 }
